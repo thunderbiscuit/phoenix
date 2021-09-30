@@ -22,23 +22,20 @@ import fr.acinq.bitcoin.ByteVector32
 import fr.acinq.bitcoin.Crypto
 import fr.acinq.lightning.*
 import fr.acinq.lightning.Lightning.randomBytes32
-import fr.acinq.lightning.channel.ChannelUnavailable
 import fr.acinq.lightning.channel.TooManyAcceptedHtlcs
 import fr.acinq.lightning.db.HopDesc
 import fr.acinq.lightning.db.IncomingPayment
 import fr.acinq.lightning.db.OutgoingPayment
-import fr.acinq.lightning.db.WalletPayment
 import fr.acinq.lightning.payment.FinalFailure
 import fr.acinq.lightning.payment.OutgoingPaymentFailure
 import fr.acinq.lightning.payment.PaymentRequest
 import fr.acinq.lightning.utils.*
 import fr.acinq.lightning.wire.TemporaryNodeFailure
-import fr.acinq.phoenix.db.payments.IncomingQueries
 import fr.acinq.phoenix.runTest
 import kotlin.test.*
 
 class SqlitePaymentsDatabaseTest {
-    private val db = SqlitePaymentsDb(testPaymentsDriver())
+    private val db = SqlitePaymentsDb(testPaymentsDriver(), loggerFactory)
 
     private val preimage1 = randomBytes32()
     private val paymentHash1 = Crypto.sha256(preimage1).toByteVector32()

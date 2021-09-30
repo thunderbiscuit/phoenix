@@ -34,7 +34,7 @@ import kotlin.test.assertTrue
 
 class SqliteChannelsDatabaseTest {
     private val db = SqliteChannelsDb(testChannelsDriver(), TestConstants.Bob.nodeParams)
-    private val db2 = SqlitePaymentsDb(testPaymentsDriver())
+    private val db2 = SqlitePaymentsDb(testPaymentsDriver(), loggerFactory)
 
 
     @ExperimentalCoroutinesApi

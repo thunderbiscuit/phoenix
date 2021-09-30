@@ -39,11 +39,11 @@ import org.kodein.memory.file.resolve
 class PhoenixBusiness(
     internal val ctx: PlatformContext
 ) {
-    internal val logMemory = LogMemory(Path(getApplicationFilesDirectoryPath(ctx)).resolve("logs"))
+//    internal val logMemory = LogMemory(Path(getApplicationFilesDirectoryPath(ctx)).resolve("logs"))
 
     val loggerFactory = LoggerFactory(
         defaultLogFrontend.withShortPackageKeepLast(1),
-        logMemory.withShortPackageKeepLast(1)
+//        logMemory.withShortPackageKeepLast(1)
     )
 
     private val logger = loggerFactory.newLogger(this::class)

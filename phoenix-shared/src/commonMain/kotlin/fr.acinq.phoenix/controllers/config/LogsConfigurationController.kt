@@ -17,7 +17,7 @@ import org.kodein.memory.use
 class AppLogsConfigurationController(
     ctx: PlatformContext,
     loggerFactory: LoggerFactory,
-    logMemory: LogMemory
+    //logMemory: LogMemory
 ) : AppController<LogsConfiguration.Model, LogsConfiguration.Intent>(
     loggerFactory = loggerFactory,
     firstModel = LogsConfiguration.Model.Loading
@@ -25,16 +25,16 @@ class AppLogsConfigurationController(
     constructor(business: PhoenixBusiness): this(
         ctx = business.ctx,
         loggerFactory = business.loggerFactory,
-        logMemory = business.logMemory
+        //logMemory = business.logMemory
     )
 
     private val numberOfFiles = 3 // Edit for longer files
 
     init {
         launch {
-            logMemory.rotate().join()
-            val file = mergeLogs(logMemory.directory, numberOfFiles, ctx)
-            model(LogsConfiguration.Model.Ready(file.path))
+//            logMemory.rotate().join()
+//            val file = mergeLogs(logMemory.directory, numberOfFiles, ctx)
+//            model(LogsConfiguration.Model.Ready(file.path))
         }
     }
 

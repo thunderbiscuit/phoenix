@@ -47,7 +47,7 @@ class DatabaseManager(
 
                 val nodeIdHash = nodeParams.nodeId.hash160().toHexString()
                 val channelsDb = SqliteChannelsDb(createChannelsDbDriver(ctx, chain, nodeIdHash), nodeParams.copy())
-                val paymentsDb = SqlitePaymentsDb(createPaymentsDbDriver(ctx, chain, nodeIdHash))
+                val paymentsDb = SqlitePaymentsDb(createPaymentsDbDriver(ctx, chain, nodeIdHash), loggerFactory)
                 log.debug { "databases object created" }
                 _databases.value = object : Databases {
                     override val channels: ChannelsDb get() = channelsDb

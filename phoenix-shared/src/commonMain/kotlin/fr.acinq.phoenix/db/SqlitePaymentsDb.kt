@@ -35,10 +35,16 @@ import fracinqphoenixdb.Incoming_payments
 import fracinqphoenixdb.Outgoing_payment_parts
 import fracinqphoenixdb.Outgoing_payments
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import org.kodein.log.LoggerFactory
+import org.kodein.log.newLogger
+import kotlin.native.concurrent.ThreadLocal
 
-class SqlitePaymentsDb(private val driver: SqlDriver) : PaymentsDb {
+class SqlitePaymentsDb(private val driver: SqlDriver, loggerFactory: LoggerFactory) : PaymentsDb {
+
+    val log = loggerFactory.newLogger(this::class)
 
     private val database = PaymentsDatabase(
         driver = driver,
@@ -172,7 +178,9 @@ class SqlitePaymentsDb(private val driver: SqlDriver) : PaymentsDb {
     }
 
     suspend fun listPaymentsOrderFlow(count: Int, skip: Int): Flow<List<WalletPaymentOrderRow>> {
+        log.info { "logging in payments database from main context=${currentCoroutineContext()}"}
         return withContext(Dispatchers.Default) {
+            log.info { "logging in payments database from default context=${currentCoroutineContext()}" }
             aggrQueries.listAllPaymentsOrder(
                 limit = count.toLong(),
                 offset = skip.toLong(),
