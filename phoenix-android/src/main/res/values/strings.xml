@@ -77,6 +77,7 @@
     <string name="startup_unlock_button">Unlock</string>
     <string name="startup_binding_service">Binding service…</string>
     <string name="startup_wait">Loading…</string>
+    <string name="startup_starting">Starting…</string>
     <string name="startup_wait_tor">Starting Tor…</string>
     <string name="startup_start_button">Restart</string>
     <string name="startup_settings_button">Settings</string>
