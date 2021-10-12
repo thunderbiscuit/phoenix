@@ -71,7 +71,7 @@ fun ChannelsView() {
                 Text(text = stringResource(id = R.string.listallchannels_no_channels))
             }
         } else {
-            ScreenBody(padding = PaddingValues(horizontal = 0.dp, vertical = 8.dp)) {
+            ScreenBody(Modifier.padding(horizontal = 0.dp, vertical = 8.dp)) {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     items(model.channels) {
                         ChannelLine(channel = it, onClick = { showChannelDialog.value = it })

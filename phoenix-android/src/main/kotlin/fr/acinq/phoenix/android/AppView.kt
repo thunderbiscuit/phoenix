@@ -119,6 +119,9 @@ fun AppView(appVM: AppViewModel) {
                 composable(Screen.MutualClose.fullRoute) {
                     MutualCloseView()
                 }
+                composable(Screen.Preferences.fullRoute) {
+                    PreferencesView()
+                }
             }
         }
     }

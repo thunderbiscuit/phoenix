@@ -55,7 +55,7 @@ fun ElectrumView() {
         subtitle = stringResource(id = R.string.electrum_subtitle)
     )
 
-    ScreenBody(padding = PaddingValues(horizontal = 0.dp, vertical = 8.dp)) {
+    ScreenBody(Modifier.padding(horizontal = 0.dp, vertical = 8.dp)) {
         MVIView(CF::electrumConfiguration) { model, postIntent ->
             val showServerDialog = remember { mutableStateOf(false) }
             val scope = rememberCoroutineScope()
@@ -175,25 +175,5 @@ private fun ElectrumServerDialog(
                 Text(stringResource(id = R.string.electrum_dialog_ssl))
             }
         }
-    }
-}
-
-@Composable
-fun Setting(modifier: Modifier = Modifier, title: String, description: String?, onClick: (() -> Unit)? = null) {
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .then(
-                if (onClick != null) {
-                    Modifier.clickable(onClick = onClick)
-                } else {
-                    Modifier
-                }
-            )
-            .then(modifier)
-            .padding(start = 50.dp, top = 10.dp, bottom = 10.dp, end = 16.dp)
-    ) {
-        Text(title, style = MaterialTheme.typography.subtitle2)
-        Text(description ?: "", style = MaterialTheme.typography.caption)
     }
 }
