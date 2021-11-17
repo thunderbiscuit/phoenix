@@ -197,7 +197,7 @@ private fun DefaultView(vm: ReceiveViewModel) {
 }
 
 @Composable
-fun QRCode(bitmap: ImageBitmap) {
+fun QRCode(bitmap: ImageBitmap, modifier: Modifier = Modifier) {
     Surface(
         Modifier
             .clip(RoundedCornerShape(16.dp))
@@ -215,6 +215,7 @@ fun QRCode(bitmap: ImageBitmap) {
             modifier = Modifier
                 .width(220.dp)
                 .height(220.dp)
+                .then(modifier)
         )
     }
 }

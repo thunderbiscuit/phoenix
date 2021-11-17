@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.lang.IllegalArgumentException
 
 
 val Context.datastore: DataStore<Preferences> by preferencesDataStore(name = Prefs.DATASTORE_FILE)
@@ -43,6 +44,21 @@ object Prefs {
             } else {
                 throw exception
             }
+        }
+    }
+
+    // -- workshop prefs
+
+    val PREFS_WORKSHOP_WORDS = stringPreferencesKey("PREFS_WORKSHOP_WORDS")
+
+    fun getWords(context: Context): Flow<List<String>?> = prefs(context).map { it[PREFS_WORKSHOP_WORDS]?.takeIf { it.isNotBlank() }?.split(" ") }
+    suspend fun saveWords(context: Context, words: List<String>) = context.datastore.edit {
+        if (words.size == 12) {
+            it[PREFS_WORKSHOP_WORDS] = words.joinToString(" ")
+        } else if (words.isEmpty()) {
+            it[PREFS_WORKSHOP_WORDS] = ""
+        } else {
+            throw IllegalArgumentException("words list must contain 12 words")
         }
     }
 

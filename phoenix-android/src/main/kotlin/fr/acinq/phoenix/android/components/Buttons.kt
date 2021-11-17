@@ -96,6 +96,34 @@ fun FilledButton(
     )
 }
 
+/** A rounded button with a solid background. */
+@Composable
+fun FilledButton(
+    modifier: Modifier = Modifier,
+    text: String? = null,
+    icon: Int? = null,
+    enabled: Boolean = true,
+    space: Dp = 16.dp,
+    textStyle: TextStyle = MaterialTheme.typography.button.copy(color = MaterialTheme.colors.onPrimary),
+    padding: PaddingValues = PaddingValues(12.dp),
+    backgroundColor: Color = MaterialTheme.colors.primary,
+    onClick: () -> Unit,
+) {
+    Button(
+        text = text,
+        icon = icon,
+        iconTint = textStyle.color, // icon has the same colors as the text
+        enabled = enabled,
+        space = space,
+        onClick = onClick,
+        shape = CircleShape,
+        backgroundColor = backgroundColor,
+        textStyle = textStyle,
+        padding = padding,
+        modifier = modifier
+    )
+}
+
 @Composable
 fun IconWithText(icon: Int, text: String, iconTint: Color = LocalContentColor.current, space: Dp = 16.dp) {
     PhoenixIcon(icon, Modifier.size(ButtonDefaults.IconSize), iconTint)
