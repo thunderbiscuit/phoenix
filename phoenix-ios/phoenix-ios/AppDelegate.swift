@@ -37,9 +37,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 	
 	let business: PhoenixBusiness
 	
-	private var _syncManager: SyncManager? = nil
-	var syncManager: SyncManager? {
-		_syncManager
+	private var _syncSeedManager: SyncSeedManager? = nil
+	var syncSeedManager: SyncSeedManager? { // read-only getter
+		_syncSeedManager
+	}
+	
+	private var _syncTxManager: SyncTxManager? = nil
+	var syncTxManager: SyncTxManager? { // read-only getter
+		_syncTxManager
 	}
 	
 	private var walletLoaded = false
@@ -85,7 +90,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 		didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
 	) -> Bool {
 
-		UIKitAppearance()
+		let navBarAppearance = UINavigationBarAppearance()
+		navBarAppearance.backgroundColor = .primaryBackground
+		navBarAppearance.shadowColor = .clear // no separator line between navBar & content
+		UINavigationBar.appearance().scrollEdgeAppearance = navBarAppearance
+		UINavigationBar.appearance().compactAppearance = navBarAppearance
+		UINavigationBar.appearance().standardAppearance = navBarAppearance
+		
+		UITableView.appearance().backgroundColor = .primaryBackground
 		
 		#if !targetEnvironment(simulator) // push notifications don't work on iOS simulator
 			UIApplication.shared.registerForRemoteNotifications()
@@ -657,19 +669,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 	// MARK: PhoenixBusiness
 	// --------------------------------------------------
 	
-	func loadWallet(mnemonics: [String]) -> Void {
-		log.trace("loadWallet(mnemonics:)")
-		assertMainThread()
-		
-		let seed = business.prepWallet(mnemonics: mnemonics, passphrase: "")
-		loadWallet(seed: seed)
-	}
-	
-	func loadWallet(seed: KotlinByteArray) -> Void {
-		log.trace("loadWallet(seed:)")
+	func loadWallet(mnemonics: [String], seed knownSeed: KotlinByteArray?) -> Void {
+		log.trace("loadWallet()")
 		assertMainThread()
 		
 		if !walletLoaded {
+			let seed = knownSeed ?? business.prepWallet(mnemonics: mnemonics, passphrase: "")
 			let cloudInfo = business.loadWallet(seed: seed)
 			walletLoaded = true
 			maybeRegisterFcmToken()
@@ -678,7 +683,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 			if let cloudKey = cloudInfo?.first,
 				let encryptedNodeId = cloudInfo?.second
 			{
-				_syncManager = SyncManager(cloudKey: cloudKey, encryptedNodeId: encryptedNodeId as String)
+				_syncSeedManager = SyncSeedManager(
+					chain: business.chain,
+					mnemonics: mnemonics,
+					encryptedNodeId: encryptedNodeId as String
+				)
+				_syncTxManager = SyncTxManager(
+					cloudKey: cloudKey,
+					encryptedNodeId: encryptedNodeId as String
+				)
 			}
 		}
 	}

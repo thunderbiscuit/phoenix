@@ -159,7 +159,7 @@ struct InitializationView: MVIView {
 		
 		AppSecurity.shared.addKeychainEntry(mnemonics: model.mnemonics) { (error: Error?) in
 			if error == nil {
-				AppDelegate.get().loadWallet(seed: model.seed)
+				AppDelegate.get().loadWallet(mnemonics: model.mnemonics, seed: model.seed)
 			}
 		}
 	}

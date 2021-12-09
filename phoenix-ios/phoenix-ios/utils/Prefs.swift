@@ -34,6 +34,8 @@ class Prefs {
 		case backupTransactions_enabled
 		case backupTransactions_useCellularData
 		case backupTransactions_useUploadDelay
+		case hasUploadedSeed
+		case backupSeed_enabled
 		case showChannelsRemoteBalance
 		case currencyConverterList
 		case recentTipPercents
@@ -258,7 +260,7 @@ class Prefs {
 	}
 	
 	// --------------------------------------------------
-	// MARK: Cloud Backup
+	// MARK: Cloud Tx Backup
 	// --------------------------------------------------
 	
 	private func recordZoneCreatedKey(_ encryptedNodeId: String) -> String {
@@ -276,7 +278,6 @@ class Prefs {
 		if value == true {
 			UserDefaults.standard.setValue(value, forKey: key)
 		} else {
-			// Remove trace of account on disk
 			UserDefaults.standard.removeObject(forKey: key)
 		}
 	}
@@ -349,6 +350,50 @@ class Prefs {
 		set {
 			let key = Keys.backupTransactions_useUploadDelay.rawValue
 			UserDefaults.standard.set(newValue, forKey: key)
+		}
+	}
+	
+	// --------------------------------------------------
+	// MARK: Cloud Seed Backup
+	// --------------------------------------------------
+	
+	private func hasUploadedSeedKey(_ encryptedNodeId: String) -> String {
+		return "\(Keys.hasUploadedSeed.rawValue)-\(encryptedNodeId)"
+	}
+	
+	func hasUploadedSeed(encryptedNodeId: String) -> Bool {
+		
+		return UserDefaults.standard.bool(forKey: hasUploadedSeedKey(encryptedNodeId))
+	}
+	
+	func setHasUploadedSeed(_ value: Bool, encryptedNodeId: String) {
+		
+		let key = hasUploadedSeedKey(encryptedNodeId)
+		if value == true {
+			UserDefaults.standard.setValue(value, forKey: key)
+		} else {
+			UserDefaults.standard.removeObject(forKey: key)
+		}
+	}
+	
+	lazy private(set) var backupSeed_isEnabledPublisher: CurrentValueSubject<Bool, Never> = {
+		var value = self.backupSeed_isEnabled
+		return CurrentValueSubject<Bool, Never>(value)
+	}()
+	
+	var backupSeed_isEnabled: Bool {
+		get {
+			let key = Keys.backupSeed_enabled.rawValue
+			if UserDefaults.standard.object(forKey: key) != nil {
+				return UserDefaults.standard.bool(forKey: key)
+			} else {
+				return false // default value
+			}
+		}
+		set {
+			let key = Keys.backupSeed_enabled.rawValue
+			UserDefaults.standard.set(newValue, forKey: key)
+			backupSeed_isEnabledPublisher.send(newValue)
 		}
 	}
 }

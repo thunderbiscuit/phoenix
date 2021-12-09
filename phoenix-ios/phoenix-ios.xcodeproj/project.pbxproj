@@ -12,7 +12,6 @@
 		53BEF90975122B844248569C /* ReceiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53BEFBC93C11EF306B9EB33A /* ReceiveView.swift */; };
 		53BEF96EC93BBB4B6C9E0845 /* lang.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53BEF6CBB2587136D25A625A /* lang.swift */; };
 		53BEF981E71E3087871890F9 /* SendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53BEFCB8A24A5FAA785AFD03 /* SendView.swift */; };
-		53BEF98CDD61115030E87C12 /* uikitAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53BEF9304C486A6B146ABE99 /* uikitAppearance.swift */; };
 		53BEF9D42E536E6A78FFD425 /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53BEFFBC23EE5A309A3DF575 /* CustomTextField.swift */; };
 		53BEFA633D95514CA5C0422A /* ChannelsConfigurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53BEF648B3A03C66B611BC06 /* ChannelsConfigurationView.swift */; };
 		53BEFBECABE13063AB28A4D6 /* publishers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53BEF60DF224046E5DE0FDCC /* publishers.swift */; };
@@ -96,19 +95,23 @@
 		DCACF6FE2566D0BA0009B01E /* GenericPasswordConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCACF6F92566D0BA0009B01E /* GenericPasswordConvertible.swift */; };
 		DCACF7092566D0F00009B01E /* AppAccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCACF7082566D0F00009B01E /* AppAccessView.swift */; };
 		DCACF70E256701870009B01E /* LockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCACF70D256701870009B01E /* LockView.swift */; };
+		DCAEF8D9275E69B000015993 /* SyncSeedManager_State.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCAEF8D8275E69B000015993 /* SyncSeedManager_State.swift */; };
+		DCAEF8F5276131A600015993 /* CheckboxToggleStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCAEF8F4276131A600015993 /* CheckboxToggleStyle.swift */; };
+		DCAEF8F727628BEB00015993 /* Either.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCAEF8F627628BEB00015993 /* Either.swift */; };
 		DCB04685260D162C007FDA37 /* ViewName.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB04684260D162C007FDA37 /* ViewName.swift */; };
 		DCB0DB8A255AE42F005B29C8 /* PhoenixShared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCB0DB83255AE42F005B29C8 /* PhoenixShared.framework */; };
 		DCB0DBB1255AEE22005B29C8 /* PhoenixShared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DCB0DB83255AE42F005B29C8 /* PhoenixShared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DCB493C92694F69B001B0F09 /* CloudOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB493C82694F69B001B0F09 /* CloudOptionsView.swift */; };
 		DCB493CB269F3B06001B0F09 /* Result+Deugly.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB493CA269F3B05001B0F09 /* Result+Deugly.swift */; };
 		DCB493CD269F8531001B0F09 /* Int+TimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB493CC269F8531001B0F09 /* Int+TimeInterval.swift */; };
-		DCB493CF269F859E001B0F09 /* SyncManagerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB493CE269F859E001B0F09 /* SyncManagerState.swift */; };
-		DCB493D1269F890D001B0F09 /* PendingSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB493D0269F890D001B0F09 /* PendingSettings.swift */; };
+		DCB493CF269F859E001B0F09 /* SyncTxManager_State.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB493CE269F859E001B0F09 /* SyncTxManager_State.swift */; };
+		DCB493D1269F890D001B0F09 /* SyncTxManager_PendingSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB493D0269F890D001B0F09 /* SyncTxManager_PendingSettings.swift */; };
 		DCB6235A25B0A42D005AD4B7 /* ComingSoonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB6235925B0A42D005AD4B7 /* ComingSoonView.swift */; };
 		DCB876302735AA7300657570 /* Prefs+Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB8762F2735AA7300657570 /* Prefs+Serialization.swift */; };
 		DCB876322735AAB500657570 /* Prefs+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB876312735AAB500657570 /* Prefs+Codable.swift */; };
+		DCBA371B2758076F00610EC8 /* SyncSeedManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCBA371A2758076F00610EC8 /* SyncSeedManager.swift */; };
 		DCC46F1625C3521C005D32D9 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = DC72C31825A3CF87008A927A /* FirebaseMessaging */; };
-		DCC9D99A267BD28600EA36DD /* SyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCC9D999267BD28600EA36DD /* SyncManager.swift */; };
+		DCC9D99A267BD28600EA36DD /* SyncTxManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCC9D999267BD28600EA36DD /* SyncTxManager.swift */; };
 		DCC9D99C267BEB3D00EA36DD /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCC9D99B267BEB3D00EA36DD /* CloudKit.framework */; };
 		DCCC7FD526B0A006008ACD9B /* SquareSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCC7FD426B0A006008ACD9B /* SquareSize.swift */; };
 		DCD5FF4326A0D34B009CC666 /* EqualSizes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCD5FF4226A0D34B009CC666 /* EqualSizes.swift */; };
@@ -168,7 +171,6 @@
 		53BEF648B3A03C66B611BC06 /* ChannelsConfigurationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChannelsConfigurationView.swift; sourceTree = "<group>"; };
 		53BEF6CBB2587136D25A625A /* lang.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = lang.swift; sourceTree = "<group>"; };
 		53BEF8EAA43946FC1C7A6E7E /* shapes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = shapes.swift; sourceTree = "<group>"; };
-		53BEF9304C486A6B146ABE99 /* uikitAppearance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = uikitAppearance.swift; sourceTree = "<group>"; };
 		53BEFA112E0701FFD6B84217 /* colors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = colors.swift; sourceTree = "<group>"; };
 		53BEFBC93C11EF306B9EB33A /* ReceiveView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReceiveView.swift; sourceTree = "<group>"; };
 		53BEFCB8A24A5FAA785AFD03 /* SendView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendView.swift; sourceTree = "<group>"; };
@@ -267,17 +269,21 @@
 		DCACF70D256701870009B01E /* LockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockView.swift; sourceTree = "<group>"; };
 		DCAE99C12671928500D76E64 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = es; path = es.lproj/about.html; sourceTree = "<group>"; };
 		DCAE99C22671928500D76E64 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = es; path = es.lproj/advancedSecurity.html; sourceTree = "<group>"; };
+		DCAEF8D8275E69B000015993 /* SyncSeedManager_State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncSeedManager_State.swift; sourceTree = "<group>"; };
+		DCAEF8F4276131A600015993 /* CheckboxToggleStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxToggleStyle.swift; sourceTree = "<group>"; };
+		DCAEF8F627628BEB00015993 /* Either.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Either.swift; sourceTree = "<group>"; };
 		DCB04684260D162C007FDA37 /* ViewName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewName.swift; sourceTree = "<group>"; };
 		DCB0DB83255AE42F005B29C8 /* PhoenixShared.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PhoenixShared.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCB493C82694F69B001B0F09 /* CloudOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudOptionsView.swift; sourceTree = "<group>"; };
 		DCB493CA269F3B05001B0F09 /* Result+Deugly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Result+Deugly.swift"; sourceTree = "<group>"; };
 		DCB493CC269F8531001B0F09 /* Int+TimeInterval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+TimeInterval.swift"; sourceTree = "<group>"; };
-		DCB493CE269F859E001B0F09 /* SyncManagerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncManagerState.swift; sourceTree = "<group>"; };
-		DCB493D0269F890D001B0F09 /* PendingSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingSettings.swift; sourceTree = "<group>"; };
+		DCB493CE269F859E001B0F09 /* SyncTxManager_State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTxManager_State.swift; sourceTree = "<group>"; };
+		DCB493D0269F890D001B0F09 /* SyncTxManager_PendingSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTxManager_PendingSettings.swift; sourceTree = "<group>"; };
 		DCB6235925B0A42D005AD4B7 /* ComingSoonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComingSoonView.swift; sourceTree = "<group>"; };
 		DCB8762F2735AA7300657570 /* Prefs+Serialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prefs+Serialization.swift"; sourceTree = "<group>"; };
 		DCB876312735AAB500657570 /* Prefs+Codable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Prefs+Codable.swift"; sourceTree = "<group>"; };
-		DCC9D999267BD28600EA36DD /* SyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncManager.swift; sourceTree = "<group>"; };
+		DCBA371A2758076F00610EC8 /* SyncSeedManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncSeedManager.swift; sourceTree = "<group>"; };
+		DCC9D999267BD28600EA36DD /* SyncTxManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTxManager.swift; sourceTree = "<group>"; };
 		DCC9D99B267BEB3D00EA36DD /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		DCCC7FD426B0A006008ACD9B /* SquareSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquareSize.swift; sourceTree = "<group>"; };
 		DCD5FF4226A0D34B009CC666 /* EqualSizes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EqualSizes.swift; sourceTree = "<group>"; };
@@ -376,6 +382,7 @@
 				DCED09D32625DBC4005D5EE2 /* AnimationCompletion.swift */,
 				DCD777D126DE9FE800979A12 /* DelayedSave.swift */,
 				DC74174C270F455D00F7E3E3 /* AES256.swift */,
+				DCAEF8F627628BEB00015993 /* Either.swift */,
 			);
 			path = utils;
 			sourceTree = "<group>";
@@ -454,7 +461,6 @@
 				53BEF1337AFCFF0AE82A46BD /* utils */,
 				DCACF6EE2566D0A60009B01E /* extensions */,
 				53BEFA112E0701FFD6B84217 /* colors.swift */,
-				53BEF9304C486A6B146ABE99 /* uikitAppearance.swift */,
 			);
 			path = "phoenix-ios";
 			sourceTree = "<group>";
@@ -522,6 +528,7 @@
 				DC384D7E265BF36600131772 /* StyledString.swift */,
 				DCD5FF4226A0D34B009CC666 /* EqualSizes.swift */,
 				DCCC7FD426B0A006008ACD9B /* SquareSize.swift */,
+				DCAEF8F4276131A600015993 /* CheckboxToggleStyle.swift */,
 			);
 			path = style;
 			sourceTree = "<group>";
@@ -627,9 +634,11 @@
 		DCC9D998267BD26D00EA36DD /* sync */ = {
 			isa = PBXGroup;
 			children = (
-				DCC9D999267BD28600EA36DD /* SyncManager.swift */,
-				DCB493CE269F859E001B0F09 /* SyncManagerState.swift */,
-				DCB493D0269F890D001B0F09 /* PendingSettings.swift */,
+				DCBA371A2758076F00610EC8 /* SyncSeedManager.swift */,
+				DCAEF8D8275E69B000015993 /* SyncSeedManager_State.swift */,
+				DCC9D999267BD28600EA36DD /* SyncTxManager.swift */,
+				DCB493CE269F859E001B0F09 /* SyncTxManager_State.swift */,
+				DCB493D0269F890D001B0F09 /* SyncTxManager_PendingSettings.swift */,
 			);
 			path = sync;
 			sourceTree = "<group>";
@@ -887,14 +896,14 @@
 				DC33369826BAF721000E3F49 /* ShortSheet.swift in Sources */,
 				DC8107D3255F1FC1002084A3 /* RecoverySeedView.swift in Sources */,
 				DC99E90925B78FA800FB20F7 /* EnabledSecurity.swift in Sources */,
-				DCB493CF269F859E001B0F09 /* SyncManagerState.swift in Sources */,
+				DCB493CF269F859E001B0F09 /* SyncTxManager_State.swift in Sources */,
 				DCB493C92694F69B001B0F09 /* CloudOptionsView.swift in Sources */,
 				7555FF7F242A565900829871 /* AppDelegate.swift in Sources */,
 				DC74174B270F332700F7E3E3 /* KotlinTypes.swift in Sources */,
 				DC142135261E72320075857A /* AboutHTML.swift in Sources */,
 				DC1706D926A71D8E00BAFCD0 /* ErrorView.swift in Sources */,
 				7555FF81242A565900829871 /* SceneDelegate.swift in Sources */,
-				DCC9D99A267BD28600EA36DD /* SyncManager.swift in Sources */,
+				DCC9D99A267BD28600EA36DD /* SyncTxManager.swift in Sources */,
 				DCB876302735AA7300657570 /* Prefs+Serialization.swift in Sources */,
 				DCE1E5FA26418183005465B8 /* Toast.swift in Sources */,
 				DC81B79F25BF2AA200F5A52C /* MVI.swift in Sources */,
@@ -907,6 +916,7 @@
 				DC0E31BB26EFDED4002071C6 /* VSlider.swift in Sources */,
 				DCACF6FC2566D0BA0009B01E /* AppSecurity.swift in Sources */,
 				DC1D2B4B2593EB860036AD38 /* CurrencyUnit.swift in Sources */,
+				DCBA371B2758076F00610EC8 /* SyncSeedManager.swift in Sources */,
 				53BEFD54160278C5E393E319 /* HomeView.swift in Sources */,
 				DC46BAF326CACCF700E760A6 /* KotlinExtensions.swift in Sources */,
 				53BEF90975122B844248569C /* ReceiveView.swift in Sources */,
@@ -927,6 +937,7 @@
 				53BEF9D42E536E6A78FFD425 /* CustomTextField.swift in Sources */,
 				DC18C418256FE22300A2D083 /* Prefs.swift in Sources */,
 				53BEF96EC93BBB4B6C9E0845 /* lang.swift in Sources */,
+				DCAEF8F5276131A600015993 /* CheckboxToggleStyle.swift in Sources */,
 				DC72C33425A51AAC008A927A /* CurrencyPrefs.swift in Sources */,
 				53BEF4D5663CD782DC63DF63 /* colors.swift in Sources */,
 				DCF360D02591018300E92031 /* CloseChannelsView.swift in Sources */,
@@ -955,11 +966,13 @@
 				53BEFA633D95514CA5C0422A /* ChannelsConfigurationView.swift in Sources */,
 				DCED09D42625DBC4005D5EE2 /* AnimationCompletion.swift in Sources */,
 				DCCC7FD526B0A006008ACD9B /* SquareSize.swift in Sources */,
-				DCB493D1269F890D001B0F09 /* PendingSettings.swift in Sources */,
+				DCB493D1269F890D001B0F09 /* SyncTxManager_PendingSettings.swift in Sources */,
+				DCAEF8F727628BEB00015993 /* Either.swift in Sources */,
 				DC09086325B626B300A46136 /* AppStatusPopover.swift in Sources */,
 				DC0732EC263CA6C3004CB88D /* PaymentOptionsView.swift in Sources */,
 				DC142148261F5DCE0075857A /* AdvancedSecurityHTML.swift in Sources */,
 				DC49DA8E258BB882005BC4BC /* ScaledButtonStyle.swift in Sources */,
+				DCAEF8D9275E69B000015993 /* SyncSeedManager_State.swift in Sources */,
 				DCB04685260D162C007FDA37 /* ViewName.swift in Sources */,
 				DCFA876D260E91E600AE8953 /* IntroContainer.swift in Sources */,
 				C8D7A70EFE0F071ACA0AE246 /* QRCodeScanner.swift in Sources */,
@@ -972,7 +985,6 @@
 				DCD5FF4326A0D34B009CC666 /* EqualSizes.swift in Sources */,
 				F4AED298257A50CD009485C1 /* LogsConfigurationView.swift in Sources */,
 				DC74174D270F455D00F7E3E3 /* AES256.swift in Sources */,
-				53BEF98CDD61115030E87C12 /* uikitAppearance.swift in Sources */,
 				C8D7AB09E80CE2B6AE270A97 /* TorConfigurationView.swift in Sources */,
 				DC59377127516297003B4B53 /* Sequence+Sum.swift in Sources */,
 				DC71E7352728A5720063613D /* KotlinIdentifiable.swift in Sources */,

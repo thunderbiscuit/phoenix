@@ -848,14 +848,14 @@ fileprivate struct AppStatusButton: View, ViewName {
 	
 	@State var dimStatus = false
 	
-	@State var syncState: SyncManagerState = .initializing
-	@State var pendingSettings: PendingSettings? = nil
+	@State var syncState: SyncTxManager_State = .initializing
+	@State var pendingSettings: SyncTxManager_PendingSettings? = nil
 	
 	@StateObject var connectionsManager = ObservableConnectionsManager()
 	
 	@Environment(\.popoverState) var popoverState: PopoverState
 
-	let syncManager = AppDelegate.get().syncManager!
+	let syncManager = AppDelegate.get().syncTxManager!
 	
 	@ViewBuilder
 	var body: some View {
@@ -970,13 +970,13 @@ fileprivate struct AppStatusButton: View, ViewName {
 		return (isSyncing, isWaiting, isError)
 	}
 	
-	func syncManagerStateChanged(_ newState: SyncManagerState) -> Void {
+	func syncManagerStateChanged(_ newState: SyncTxManager_State) -> Void {
 		log.trace("[\(viewName)] syncManagerStateChanged()")
 		
 		syncState = newState
 	}
 	
-	func syncManagerPendingSettingsChanged(_ newPendingSettings: PendingSettings?) -> Void {
+	func syncManagerPendingSettingsChanged(_ newPendingSettings: SyncTxManager_PendingSettings?) -> Void {
 		log.trace("[\(viewName)] syncManagerPendingSettingsChanged()")
 		
 		pendingSettings = newPendingSettings

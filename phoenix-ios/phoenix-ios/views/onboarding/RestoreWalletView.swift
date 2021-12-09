@@ -93,7 +93,7 @@ struct RestoreWalletView: MVIView {
 		
 		AppSecurity.shared.addKeychainEntry(mnemonics: mnemonics) { (error: Error?) in
 			if error == nil {
-				AppDelegate.get().loadWallet(seed: model.seed)
+				AppDelegate.get().loadWallet(mnemonics: mnemonics, seed: model.seed)
 			}
 		}
 	}

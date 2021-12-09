@@ -202,7 +202,7 @@ struct LockView : View {
 			
 			switch result {
 				case .success(let mnemonics):
-					AppDelegate.get().loadWallet(mnemonics: mnemonics)
+					AppDelegate.get().loadWallet(mnemonics: mnemonics, seed: nil)
 					withAnimation(.easeInOut) {
 						lockState.isUnlocked = true
 					}

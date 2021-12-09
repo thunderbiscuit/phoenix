@@ -209,7 +209,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 			if let mnemonics = mnemonics {
 				// unlock & load wallet
-				AppDelegate.get().loadWallet(mnemonics: mnemonics)
+				AppDelegate.get().loadWallet(mnemonics: mnemonics, seed: nil)
 			}
 			
 			if let danger = danger {

@@ -9,7 +9,7 @@ import os.log
 #if DEBUG && true
 fileprivate var log = Logger(
 	subsystem: Bundle.main.bundleIdentifier!,
-	category: "SyncManager"
+	category: "SyncTxManager"
 )
 #else
 fileprivate var log = Logger(OSLog.disabled)
@@ -31,7 +31,7 @@ fileprivate let record_table_name = "payments"
 fileprivate let record_column_data = "encryptedData"
 fileprivate let record_column_meta = "encryptedMeta"
 
-/// See `SyncManagerState.swift` for state machine diagrams
+/// See `SyncTxManager_State.swift` for state machine diagrams
 /// 
 fileprivate struct AtomicState {
 	var needsDatabases = true
@@ -47,8 +47,8 @@ fileprivate struct AtomicState {
 	
 	var paymentsQueueCount: Int = 0
 	
-	var active: SyncManagerState
-	var pendingSettings: PendingSettings? = nil
+	var active: SyncTxManager_State
+	var pendingSettings: SyncTxManager_PendingSettings? = nil
 	
 	init(isEnabled: Bool, recordZoneCreated: Bool, hasDownloadedRecords: Bool) {
 		self.isEnabled = isEnabled
@@ -96,9 +96,9 @@ fileprivate struct ConsecutivePartialFailure {
 // MARK: -
 // --------------------------------------------------------------------------------
 
-/// Encompasses all the logic for syncing data with Apple's CloudKit database.
+/// Encompasses the logic for syncing transactions with Apple's CloudKit database.
 ///
-class SyncManager {
+class SyncTxManager {
 	
 	/// The cloudKey is derived from the user's seed.
 	/// It's used to encrypt data before uploading to the cloud.
@@ -114,18 +114,18 @@ class SyncManager {
 	///
 	private let encryptedNodeId: String
 	
-	/// Informs the user interface regarding the activities of the SyncManager.
+	/// Informs the user interface regarding the activities of the SyncTxManager.
 	/// This includes various errors & active upload progress.
 	///
 	/// Changes to this publisher will always occur on the main thread.
 	///
-	public let statePublisher = CurrentValueSubject<SyncManagerState, Never>(.initializing)
+	public let statePublisher = CurrentValueSubject<SyncTxManager_State, Never>(.initializing)
 	
-	/// Informs the user interface about a pending change to the SyncManager's global settings.
+	/// Informs the user interface about a pending change to the SyncTxManager's global settings.
 	/// 
-	public let pendingSettingsPublisher = CurrentValueSubject<PendingSettings?, Never>(nil)
+	public let pendingSettingsPublisher = CurrentValueSubject<SyncTxManager_PendingSettings?, Never>(nil)
 	
-	private let queue = DispatchQueue(label: "SyncManager")
+	private let queue = DispatchQueue(label: "SyncTxManager")
 	private var state: AtomicState // must be read/modified within queue
 	
 	private let networkMonitor: NWPathMonitor
@@ -290,10 +290,10 @@ class SyncManager {
 			
 			let delay = 30.seconds()
 			let pendingSettings = shouldEnable ?
-				PendingSettings(self, enableSyncing: delay)
-			:	PendingSettings(self, disableSyncing: delay)
+				SyncTxManager_PendingSettings(self, enableSyncing: delay)
+			:	SyncTxManager_PendingSettings(self, disableSyncing: delay)
 			
-			var publishMe: PendingSettings? = pendingSettings
+			var publishMe: SyncTxManager_PendingSettings? = pendingSettings
 			self.updateState { state, _ in
 				
 				if shouldEnable {
@@ -327,7 +327,7 @@ class SyncManager {
 	// MARK: Publishers
 	// ----------------------------------------
 	
-	private func publishNewState(_ state: SyncManagerState) {
+	private func publishNewState(_ state: SyncTxManager_State) {
 		log.trace("publishNewState()")
 		
 		let block = {
@@ -341,7 +341,7 @@ class SyncManager {
 		}
 	}
 	
-	private func publishPendingSettings(_ pending: PendingSettings?) {
+	private func publishPendingSettings(_ pending: SyncTxManager_PendingSettings?) {
 		log.trace("publishPendingSettings()")
 		
 		let block = {
@@ -359,7 +359,7 @@ class SyncManager {
 	// MARK: State Machine
 	// ----------------------------------------
 	
-	func updateState(pending: PendingSettings, approved: Bool) {
+	func updateState(pending: SyncTxManager_PendingSettings, approved: Bool) {
 		log.trace("updateState(pending: approved: \(approved ? "true" : "false"))")
 	
 		var shouldPublish = false
@@ -466,7 +466,7 @@ class SyncManager {
 		}
 	}
 	
-	func updateState(finishing waiting: SyncManagerState_Waiting) {
+	func updateState(finishing waiting: SyncTxManager_State_Waiting) {
 		log.trace("updateState(finishing waiting)")
 		
 		updateState { state, deferToSimplifiedStateFlow in
@@ -490,7 +490,7 @@ class SyncManager {
 	
 	private func updateState(_ modifyStateBlock: (inout AtomicState, inout Bool) -> Void) {
 		
-		var changedState: SyncManagerState? = nil
+		var changedState: SyncTxManager_State? = nil
 		queue.sync {
 			let prvActive = state.active
 			var deferToSimplifiedStateFlow = false
@@ -508,11 +508,11 @@ class SyncManager {
 					if state.needsCreateRecordZone {
 						state.active = .updatingCloud_creatingRecordZone()
 					} else if state.needsDownloadExisting {
-						state.active = .downloading(details: SyncManagerState_Progress(
+						state.active = .downloading(details: SyncTxManager_State_Progress(
 							totalCount: 0
 						))
 					} else if state.paymentsQueueCount > 0 {
-						state.active = .uploading(details: SyncManagerState_Progress(
+						state.active = .uploading(details: SyncTxManager_State_Progress(
 							totalCount: state.paymentsQueueCount
 						))
 					} else {
@@ -680,7 +680,7 @@ class SyncManager {
 	/// This allows us to properly segregate transactions between multiple wallets.
 	/// Before we can interact with the RecordZone we have to explicitly create it.
 	///
-	private func createRecordZone(_ updatingCloud: SyncManagerState_UpdatingCloud) {
+	private func createRecordZone(_ updatingCloud: SyncTxManager_State_UpdatingCloud) {
 		log.trace("createRecordZone()")
 		
 		let finish = { (result: Result<Void, Error>) in
@@ -744,7 +744,7 @@ class SyncManager {
 		}
 	}
 	
-	private func deleteRecordZone(_ updatingCloud: SyncManagerState_UpdatingCloud) {
+	private func deleteRecordZone(_ updatingCloud: SyncTxManager_State_UpdatingCloud) {
 		log.debug("deleteRecordZone()")
 		
 		let finish = { (result: Result<Void, Error>) in
@@ -840,7 +840,7 @@ class SyncManager {
 		step1()
 	}
 	
-	private func downloadPayments(_ downloadProgress: SyncManagerState_Progress) {
+	private func downloadPayments(_ downloadProgress: SyncTxManager_State_Progress) {
 		log.trace("downloadPayments()")
 		
 		let finish = { (result: Result<Void, Error>) in
@@ -906,7 +906,7 @@ class SyncManager {
 		fetchTotalCount = { (oldestCreationDate: Date?) in
 			log.trace("downloadPayments(): fetchTotalCount()")
 			
-			// If we want to report proper progress (via `SyncManagerState_UpdatingCloud`),
+			// If we want to report proper progress (via `SyncTxManager_State_UpdatingCloud`),
 			// then we need to know the total number of records to be downloaded from the cloud.
 			//
 			// However, there's a minor problem here:
@@ -1190,7 +1190,7 @@ class SyncManager {
 	/// - remove the uploaded items from the queue
 	/// - repeat as needed
 	///
-	private func uploadPayments(_ uploadProgress: SyncManagerState_Progress) {
+	private func uploadPayments(_ uploadProgress: SyncTxManager_State_Progress) {
 		log.trace("uploadPayments()")
 		
 		let finish = { (result: Result<Void, Error>) in
