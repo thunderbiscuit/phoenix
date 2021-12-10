@@ -47,9 +47,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 		_syncTxManager
 	}
 	
+	private var _encryptedNodeId: String? = nil
+	var encryptedNodeId: String? { // read-only getter
+		return _encryptedNodeId
+	}
+	
 	private var walletLoaded = false
 	private var fcmToken: String? = nil
-	private var peerConnection: Lightning_kmpConnection? = nil
+	private var peerConnectionState: Lightning_kmpConnection? = nil
 	
 	private var badgeCount = 0
 	private var cancellables = Set<AnyCancellable>()
@@ -683,6 +688,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 			if let cloudKey = cloudInfo?.first,
 				let encryptedNodeId = cloudInfo?.second
 			{
+				_encryptedNodeId = encryptedNodeId as String
 				_syncSeedManager = SyncSeedManager(
 					chain: business.chain,
 					mnemonics: mnemonics,
@@ -699,11 +705,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 	private func connectionsChanged(_ connections: Connections) -> Void {
 		log.trace("connectionsChanged()")
 		
-		let prvPeerConnection = peerConnection
-		peerConnection = connections.peer
+		let prvPeerConnectionState = peerConnectionState
+		peerConnectionState = connections.peer
 		
-		if prvPeerConnection != Lightning_kmpConnection.established &&
-		   peerConnection == Lightning_kmpConnection.established
+		if prvPeerConnectionState != Lightning_kmpConnection.established &&
+		   peerConnectionState == Lightning_kmpConnection.established
 		{
 			maybeRegisterFcmToken()
 		}
@@ -721,7 +727,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 			log.debug("maybeRegisterFcmToken: no: !fcmToken")
 			return
 		}
-		if peerConnection != Lightning_kmpConnection.established {
+		if peerConnectionState != Lightning_kmpConnection.established {
 			log.debug("maybeRegisterFcmToken: no: !peerConnection")
 			return
 		}

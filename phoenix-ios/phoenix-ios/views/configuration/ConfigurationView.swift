@@ -28,7 +28,7 @@ struct ConfigurationView: MVIView {
 		case ElectrumConfigurationView
 		case TorView
 		case PaymentOptionsView
-		case CloudOptionsView
+		case BackupView
 		case AppAccessView
 		case RecoverySeedView
 		case LogsConfigurationView
@@ -79,12 +79,12 @@ struct ConfigurationView: MVIView {
 				}
 				
 				NavigationLink(
-					destination: CloudOptionsView(),
-					tag: Tag.CloudOptionsView,
+					destination: BackupView(),
+					tag: Tag.BackupView,
 					selection: $selectedTag
 				) {
-					Label { Text("Cloud backup") } icon: {
-						Image(systemName: "icloud")
+					Label { Text("Backup") } icon: {
+						Image(systemName: "icloud.and.arrow.up")
 					}
 				}
 			}
@@ -101,15 +101,15 @@ struct ConfigurationView: MVIView {
 							Image(systemName: isTouchID ? "touchid" : "faceid")
 						}
 					}
-					NavigationLink(
-						destination: RecoverySeedView(),
-						tag: Tag.RecoverySeedView,
-						selection: $selectedTag
-					) {
-						Label { Text("Recovery phrase") } icon: {
-							Image(systemName: "key")
-						}
-					}
+//					NavigationLink(
+//						destination: RecoverySeedView(),
+//						tag: Tag.RecoverySeedView,
+//						selection: $selectedTag
+//					) {
+//						Label { Text("Recovery phrase") } icon: {
+//							Image(systemName: "key")
+//						}
+//					}
 				}
 			}
 

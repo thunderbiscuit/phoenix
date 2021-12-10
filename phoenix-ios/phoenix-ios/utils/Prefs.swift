@@ -34,8 +34,9 @@ class Prefs {
 		case backupTransactions_enabled
 		case backupTransactions_useCellularData
 		case backupTransactions_useUploadDelay
-		case hasUploadedSeed
 		case backupSeed_enabled
+		case backupSeed_hasUploadedSeed
+		case backupSeed_name
 		case showChannelsRemoteBalance
 		case currencyConverterList
 		case recentTipPercents
@@ -357,26 +358,7 @@ class Prefs {
 	// MARK: Cloud Seed Backup
 	// --------------------------------------------------
 	
-	private func hasUploadedSeedKey(_ encryptedNodeId: String) -> String {
-		return "\(Keys.hasUploadedSeed.rawValue)-\(encryptedNodeId)"
-	}
-	
-	func hasUploadedSeed(encryptedNodeId: String) -> Bool {
-		
-		return UserDefaults.standard.bool(forKey: hasUploadedSeedKey(encryptedNodeId))
-	}
-	
-	func setHasUploadedSeed(_ value: Bool, encryptedNodeId: String) {
-		
-		let key = hasUploadedSeedKey(encryptedNodeId)
-		if value == true {
-			UserDefaults.standard.setValue(value, forKey: key)
-		} else {
-			UserDefaults.standard.removeObject(forKey: key)
-		}
-	}
-	
-	lazy private(set) var backupSeed_isEnabledPublisher: CurrentValueSubject<Bool, Never> = {
+	lazy private(set) var backupSeed_isEnabled_publisher: CurrentValueSubject<Bool, Never> = {
 		var value = self.backupSeed_isEnabled
 		return CurrentValueSubject<Bool, Never>(value)
 	}()
@@ -393,7 +375,54 @@ class Prefs {
 		set {
 			let key = Keys.backupSeed_enabled.rawValue
 			UserDefaults.standard.set(newValue, forKey: key)
-			backupSeed_isEnabledPublisher.send(newValue)
+			backupSeed_isEnabled_publisher.send(newValue)
+		}
+	}
+	
+	private func backupSeed_hasUploadedSeed_key(_ encryptedNodeId: String) -> String {
+		return "\(Keys.backupSeed_hasUploadedSeed.rawValue)-\(encryptedNodeId)"
+	}
+	
+	func backupSeed_hasUploadedSeed(encryptedNodeId: String) -> Bool {
+		
+		return UserDefaults.standard.bool(forKey: backupSeed_hasUploadedSeed_key(encryptedNodeId))
+	}
+	
+	func backupSeed_setHasUploadedSeed(_ value: Bool, encryptedNodeId: String) {
+		
+		let key = backupSeed_hasUploadedSeed_key(encryptedNodeId)
+		if value == true {
+			UserDefaults.standard.setValue(value, forKey: key)
+		} else {
+			UserDefaults.standard.removeObject(forKey: key)
+		}
+	}
+	
+	lazy private(set) var backupSeed_name_publisher: PassthroughSubject<Void, Never> = {
+		return PassthroughSubject<Void, Never>()
+	}()
+	
+	private func backupSeed_name_key(_ encryptedNodeId: String) -> String {
+		return "\(Keys.backupSeed_name)-\(encryptedNodeId)"
+	}
+	
+	func backupSeed_name(encryptedNodeId: String) -> String? {
+		
+		return UserDefaults.standard.string(forKey: backupSeed_name_key(encryptedNodeId))
+	}
+	
+	func backupSeed_setName(_ newValue: String, encryptedNodeId: String) {
+		
+		let key = backupSeed_name_key(encryptedNodeId)
+		let oldValue = backupSeed_name(encryptedNodeId: encryptedNodeId) ?? ""
+		if oldValue != newValue {
+			if newValue.isEmpty {
+				UserDefaults.standard.removeObject(forKey: key)
+			} else {
+				UserDefaults.standard.setValue(newValue, forKey: key)
+			}
+			backupSeed_setHasUploadedSeed(false, encryptedNodeId: encryptedNodeId)
+			backupSeed_name_publisher.send()
 		}
 	}
 }

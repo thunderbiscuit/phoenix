@@ -6,7 +6,7 @@ import os.log
 #if DEBUG && true
 fileprivate var log = Logger(
 	subsystem: Bundle.main.bundleIdentifier!,
-	category: "CloudOptionsView"
+	category: "BackupView"
 )
 #else
 fileprivate var log = Logger(OSLog.disabled)
@@ -22,7 +22,7 @@ extension VerticalAlignment {
 	static let centerTopLine = VerticalAlignment(CenterTopLineAlignment.self)
 }
 
-struct CloudOptionsView: View {
+struct BackupView: View {
 	
 	var body: some View {
 		
@@ -31,7 +31,7 @@ struct CloudOptionsView: View {
 			Section_BackupTransactions()
 		}
 		.listStyle(.insetGrouped)
-		.navigationTitle("Cloud Backup")
+		.navigationTitle("Backup")
 	}
 }
 
@@ -47,7 +47,7 @@ fileprivate struct Section_BackupSeed: View {
 		
 		Section(header: Text("Recovery Phrase")) {
 			
-			NavigationLink(destination: EmptyView()) {
+			NavigationLink(destination: ManualBackupView()) {
 				HStack(alignment: VerticalAlignment.center, spacing: 0) {
 					Label("Manual backup", systemImage: "squareshape.split.3x3")
 					Spacer()
@@ -456,55 +456,56 @@ fileprivate struct SyncErrorDetails: View, ViewName {
 	@ViewBuilder
 	var body: some View {
 		
-		VStack(alignment: HorizontalAlignment.leading, spacing: 4) {
-			HStack(alignment: VerticalAlignment.center, spacing: 4) {
-				Image(systemName: "exclamationmark.triangle.fill")
-					.renderingMode(.template)
-					.foregroundColor(Color.appWarn)
-				
+		Label {
+			VStack(alignment: HorizontalAlignment.leading, spacing: 4) {
 				Text("Error - retry in:")
-			}
-			
-			HStack(alignment: VerticalAlignment.center, spacing: 8) {
 				
-				let (progress, remaining, total) = progressInfo()
-				
-				ProgressView(value: progress, total: 1.0)
-					.progressViewStyle(CircularCheckmarkProgressViewStyle(
-						strokeStyle: StrokeStyle(lineWidth: 3.0),
-						showGuidingLine: true,
-						guidingLineWidth: 1.0,
-						showPercentage: false,
-						checkmarkAnimation: .trim
-					))
-					.foregroundColor(Color.appAccent)
-					.frame(maxWidth: 20, maxHeight: 20)
-				
-				Text(verbatim: "\(remaining) / \(total)")
-					.font(.system(.callout, design: .monospaced))
-				
-				Spacer()
-				
-				Button {
-					skipButtonTapped()
-				} label: {
-					HStack(alignment: VerticalAlignment.center, spacing: 4) {
-						Text("Skip")
-						Image(systemName: "arrowshape.turn.up.forward")
-							.imageScale(.medium)
+				HStack(alignment: VerticalAlignment.center, spacing: 8) {
+					
+					let (progress, remaining, total) = progressInfo()
+					
+					ProgressView(value: progress, total: 1.0)
+						.progressViewStyle(CircularCheckmarkProgressViewStyle(
+							strokeStyle: StrokeStyle(lineWidth: 3.0),
+							showGuidingLine: true,
+							guidingLineWidth: 1.0,
+							showPercentage: false,
+							checkmarkAnimation: .trim
+						))
+						.foregroundColor(Color.appAccent)
+						.frame(width: 20, height: 20, alignment: .center)
+					//	.frame(minWidth: 25, maxWidth: 35, minHeight: 25, maxHeight: 35, alignment: .center)
+					
+					Text(verbatim: "\(remaining) / \(total)")
+						.font(.system(.callout, design: .monospaced))
+					
+					Spacer()
+					
+					Button {
+						skipButtonTapped()
+					} label: {
+						HStack(alignment: VerticalAlignment.center, spacing: 4) {
+							Text("Skip")
+							Image(systemName: "arrowshape.turn.up.forward")
+								.imageScale(.medium)
+						}
 					}
 				}
-			}
-			.padding(.top, 4)
-			.padding(.bottom, 4)
-			
-			if let errorInfo = errorInfo() {
-				Text(errorInfo)
-					.font(.callout)
-					.multilineTextAlignment(.leading)
-					.lineLimit(2)
-			}
-		} // </VStack>
+				.padding(.top, 4)
+				.padding(.bottom, 4)
+				
+				if let errorInfo = errorInfo() {
+					Text(errorInfo)
+						.font(.callout)
+						.multilineTextAlignment(.leading)
+						.lineLimit(2)
+				}
+			} // </VStack>
+		} icon: {
+			Image(systemName: "exclamationmark.triangle.fill")
+				.renderingMode(.template)
+				.foregroundColor(Color.appWarn)
+		}
 		.onReceive(timer) { _ in
 			self.currentDate = Date()
 		}
@@ -564,191 +565,5 @@ fileprivate struct SyncErrorDetails: View, ViewName {
 		log.trace("[\(viewName)] skipButtonTapped()")
 		
 		waiting.skip()
-	}
-}
-
-fileprivate struct CloudBackupAgreement: View, ViewName {
-	
-	@Binding var backupSeed_enabled: Bool
-	
-	@State var toggle_enabled: Bool
-	
-	@State var legal_appleRisk: Bool
-	@State var legal_governmentRisk: Bool
-	
-	@State var animatingLegalToggleColor = false
-	
-	var canSave: Bool {
-		if backupSeed_enabled {
-			// Currently enabled.
-			// To disable, user only needs to disable the toggle
-			return !toggle_enabled
-		} else {
-			// Currently disabled.
-			// To enable, user must enable the toggle, and accept the legal risks.
-			return toggle_enabled && legal_appleRisk && legal_governmentRisk
-		}
-	}
-	
-	@Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-	
-	init(backupSeed_enabled: Binding<Bool>) {
-		self._backupSeed_enabled = backupSeed_enabled
-		let enabled = backupSeed_enabled.wrappedValue
-		
-		self._toggle_enabled = State<Bool>(initialValue: enabled)
-		self._legal_appleRisk = State<Bool>(initialValue: enabled)
-		self._legal_governmentRisk = State<Bool>(initialValue: enabled)
-	}
-	
-	@ViewBuilder
-	var body: some View {
-		
-		List {
-			section_toggle()
-			section_legal()
-		}
-		.navigationTitle("iCloud Backup")
-		.navigationBarBackButtonHidden(true)
-		.navigationBarItems(leading: backButton())
-	}
-	
-	@ViewBuilder
-	func backButton() -> some View {
-		
-		Button {
-			didTapBackButton()
-		} label: {
-			HStack(alignment: VerticalAlignment.center, spacing: 0) {
-				Image(systemName: "chevron.left")
-					 .font(.title2)
-				if canSave {
-					Text("Save")
-				} else {
-					Text("Cancel")
-				}
-			}
-		}
-	}
-	
-	@ViewBuilder
-	func section_toggle() -> some View {
-		
-		Section {
-			Toggle(isOn: $toggle_enabled) {
-				Label("Enable iCloud backup", systemImage: "icloud")
-			}
-			.padding(.bottom, 5)
-			
-			// Implicit divider added here
-			
-			VStack(alignment: HorizontalAlignment.leading, spacing: 0) {
-				Label {
-					Text(
-						"""
-						Your recovery phrase will be stored in iCloud, \
-						and Phoenix can automatically restore your wallet balance.
-						"""
-					)
-				} icon: {
-					Image(systemName: "lightbulb")
-				}
-			}
-			.padding(.vertical, 10)
-		}
-	}
-	
-	@ViewBuilder
-	func section_legal() -> some View {
-		
-		Section {
-			
-			Toggle(isOn: $legal_appleRisk) {
-				Text(
-					"""
-					I understand that certain Apple employees may be able \
-					to access my iCloud data.
-					"""
-				)
-				.lineLimit(nil)
-				.alignmentGuide(VerticalAlignment.center) { d in
-					d[VerticalAlignment.firstTextBaseline]
-				}
-			}
-			.toggleStyle(CheckboxToggleStyle(
-				onImage: onImage(),
-				offImage: offImage()
-			))
-			.padding(.vertical, 5)
-			
-			Toggle(isOn: $legal_governmentRisk) {
-				Text(
-					"""
-					I understand that Apple may share my iCloud data \
-					with government agencies upon request.
-					"""
-				)
-				.lineLimit(nil)
-				.alignmentGuide(VerticalAlignment.center) { d in
-					d[VerticalAlignment.firstTextBaseline]
-				}
-			}
-			.toggleStyle(CheckboxToggleStyle(
-				onImage: onImage(),
-				offImage: offImage()
-			))
-			.padding(.vertical, 5)
-			
-		} header: {
-			Text("Legal")
-			
-		} // </Section>
-		.onChange(of: toggle_enabled) { newValue in
-			didToggleEnabled(newValue)
-		}
-	}
-	
-	@ViewBuilder
-	func onImage() -> some View {
-		Image(systemName: "checkmark.square.fill")
-			.imageScale(.large)
-	}
-	
-	@ViewBuilder
-	func offImage() -> some View {
-		if toggle_enabled {
-			Image(systemName: "square")
-				.renderingMode(.template)
-				.imageScale(.large)
-				.foregroundColor(animatingLegalToggleColor ? Color.red : Color.primary)
-		} else {
-			Image(systemName: "square")
-				.imageScale(.large)
-		}
-	}
-	
-	func didToggleEnabled(_ value: Bool) {
-		log.trace("[\(viewName)] didToggleEnabled")
-		
-		if value {
-			DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-				if toggle_enabled {
-					withAnimation(Animation.linear(duration: 0.5).repeatForever(autoreverses: true)) {
-						animatingLegalToggleColor = true
-					}
-				}
-			}
-		} else {
-			animatingLegalToggleColor = false
-		}
-	}
-	
-	func didTapBackButton() {
-		log.trace("[\(viewName)] didTapBackButton()")
-		
-		if canSave {
-			backupSeed_enabled = toggle_enabled
-		}
-		presentationMode.wrappedValue.dismiss()
 	}
 }

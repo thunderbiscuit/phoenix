@@ -5,13 +5,13 @@ import os.log
 #if DEBUG && true
 fileprivate var log = Logger(
 	subsystem: Bundle.main.bundleIdentifier!,
-	category: "RecoverySeedView"
+	category: "ManualBackupView"
 )
 #else
 fileprivate var log = Logger(OSLog.disabled)
 #endif
 
-struct RecoverySeedView : View {
+struct ManualBackupView : View {
 	
 	@State var isDecrypting = false
 	@State var revealSeed = false
@@ -19,12 +19,32 @@ struct RecoverySeedView : View {
 	
 	var body: some View {
 		
-		ScrollView(.vertical, showsIndicators: true) {
-				
-			VStack(alignment: .leading, spacing: 40) {
+		List {
+			section_info()
+			section_button()
+		}
+		.sheet(isPresented: $revealSeed) {
+			
+			RecoverySeedReveal(
+				isShowing: $revealSeed,
+				mnemonics: $mnemonics
+			)
+		}
+		.navigationBarTitle(
+			NSLocalizedString("Manual Backup", comment: "Navigation bar title"),
+			displayMode: .inline
+		)
+	}
+	
+	@ViewBuilder
+	func section_info() -> some View {
+		
+		Section {
+			
+			VStack(alignment: .leading, spacing: 35) {
 				Text(
 					"""
-					The backup phrase, known as a seed, is a list of 12 english words. \
+					The recovery phrase (sometimes called a seed), is a list of 12 english words. \
 					It allows you to recover full access to your funds if needed.
 					"""
 				)
@@ -39,7 +59,7 @@ struct RecoverySeedView : View {
 					**Do not share this seed with anyone.** \
 					Beware of phishing. The developers of Phoenix will never ask for your seed.
 					""",
-					comment: "RecoverySeedView"
+					comment: "ManualBackupView"
 				))
 				
 				Text(styled: NSLocalizedString(
@@ -48,37 +68,54 @@ struct RecoverySeedView : View {
 					Save it somewhere safe (not on this phone). \
 					If you lose your seed and your phone, you've lost your funds.
 					""",
-					comment: "RecoverySeedView"
+					comment: "ManualBackupView"
 				))
+					
+			} // </VStack>
+			.padding(.vertical, 15)
+			
+		} // </Section>
+	}
+	
+	@ViewBuilder
+	func section_button() -> some View {
+		
+		Section {
+			
+			VStack(alignment: HorizontalAlignment.center, spacing: 0) {
 				
 				Button {
 					decrypt()
 				} label: {
 					HStack {
-						Image(systemName: "key").imageScale(.small)
+						Image(systemName: "key")
+							.imageScale(.medium)
 						Text("Display seed")
+							.font(.headline)
 					}
 				}
 				.disabled(isDecrypting)
-					
-			} // </VStack>
-			.padding(.top, 20)
-			.padding(.bottom, 20)
-			.padding([.leading, .trailing], 30)
+				.padding(.vertical, 5)
 				
-		} // </ScrollView>
-		.sheet(isPresented: $revealSeed) {
+				let enabledSecurity = AppSecurity.shared.enabledSecurity.value
+				if enabledSecurity != .none {
+					Text("(requires authentication)")
+						.font(.footnote)
+						.foregroundColor(.secondary)
+						.padding(.top, 5)
+						.padding(.bottom, 10)
+				}
+			} // </VStack>
+			.frame(maxWidth: .infinity)
 			
-			RecoverySeedReveal(
-				isShowing: $revealSeed,
-				mnemonics: $mnemonics
-			)
-		}
-		.navigationBarTitle(
-			NSLocalizedString("Recovery Seed", comment: "Navigation bar title"),
-			displayMode: .inline
-		)
+		} // </Section>
 	}
+	
+//	@ViewBuilder
+//	func section_legal() -> some View {
+//		
+//		// Todo...
+//	}
 	
 	func decrypt() -> Void {
 		
@@ -245,11 +282,11 @@ class RecoverySeedView_Previews: PreviewProvider {
 	
 	static var previews: some View {
 		
-		RecoverySeedView()
+		ManualBackupView()
 			.preferredColorScheme(.light)
 			.previewDevice("iPhone 8")
 		
-		RecoverySeedView()
+		ManualBackupView()
 			.preferredColorScheme(.dark)
 			.previewDevice("iPhone 8")
 		

@@ -50,7 +50,9 @@ fileprivate struct AtomicState {
 			needsDeleteSeed = hasUploadedSeed
 		}
 		
-		if !isEnabled && !needsDeleteSeed {
+		if isEnabled && !needsUploadSeed {
+			active = .synced
+		} else if !isEnabled && !needsDeleteSeed {
 			active = .disabled
 		} else {
 			active = .initializing
@@ -113,7 +115,7 @@ class SyncSeedManager {
 		
 		state = AtomicState(
 			isEnabled: Prefs.shared.backupSeed_isEnabled,
-			hasUploadedSeed: Prefs.shared.hasUploadedSeed(encryptedNodeId: encryptedNodeId)
+			hasUploadedSeed: Prefs.shared.backupSeed_hasUploadedSeed(encryptedNodeId: encryptedNodeId)
 		)
 		statePublisher = CurrentValueSubject<SyncSeedManager_State, Never>(state.active)
 		
@@ -121,27 +123,13 @@ class SyncSeedManager {
 		startNetworkMonitor()
 		startCloudStatusMonitor()
 		startPreferencesMonitor()
+		startNameMonitor()
 		checkForCloudCredentials()
 	}
 	
 	// ----------------------------------------
 	// MARK: Fetch Seeds
 	// ----------------------------------------
-	
-	private class func record_table_name(chain: Chain) -> String {
-		
-		// From Apple's docs:
-		// > A record type must consist of one or more alphanumeric characters
-		// > and must start with a letter. CloudKit permits the use of underscores,
-		// > but not spaces.
-		//
-		var allowed = CharacterSet.alphanumerics
-		allowed.insert("_")
-		
-		let suffix = chain.name.lowercased().components(separatedBy: allowed.inverted).joined(separator: "")
-		
-		return "seeds_bitcoin_\(suffix)"
-	}
 	
 	public class func fetchSeeds(chain: Chain) -> PassthroughSubject<SeedBackup, FetchSeedsError> {
 		
@@ -322,14 +310,14 @@ class SyncSeedManager {
 		log.trace("startPreferencesMonitor()")
 		
 		var isFirstFire = true
-		Prefs.shared.backupSeed_isEnabledPublisher.sink {[weak self](shouldEnable: Bool) in
+		Prefs.shared.backupSeed_isEnabled_publisher.sink {[weak self](shouldEnable: Bool) in
 			
 			if isFirstFire {
 				isFirstFire = false
 				return
 			}
 			
-			log.debug("Prefs.shared.backupSeed_isEnabledPublisher = \(shouldEnable ? "true" : "false")")
+			log.debug("Prefs.shared.backupSeed_isEnabled_publisher = \(shouldEnable ? "true" : "false")")
 
 			self?.updateState { state, deferToSimplifiedStateFlow in
 				
@@ -388,6 +376,26 @@ class SyncSeedManager {
 		}.store(in: &cancellables)
 	}
 	
+	private func startNameMonitor() {
+		log.trace("startNameMonitor()")
+		
+		Prefs.shared.backupSeed_name_publisher.sink {[weak self] _ in
+			
+			log.debug("Prefs.shared.backupSeed_name_publisher => fired")
+
+			self?.updateState { state, deferToSimplifiedStateFlow in
+				state.needsUploadSeed = true
+				
+				switch state.active {
+					case .synced:
+						deferToSimplifiedStateFlow = true
+					default: break
+				}
+			}
+			
+		}.store(in: &cancellables)
+	}
+	
 	// ----------------------------------------
 	// MARK: Publishers
 	// ----------------------------------------
@@ -396,6 +404,7 @@ class SyncSeedManager {
 		log.trace("publishNewState()")
 		
 		let block = {
+			log.debug("statePublisher.value = \(state)")
 			self.statePublisher.value = state
 		}
 		
@@ -561,17 +570,32 @@ class SyncSeedManager {
 	private func uploadSeed() {
 		log.trace("uploadSeed()")
 		
+		let uploadedName = Prefs.shared.backupSeed_name(encryptedNodeId: encryptedNodeId) ?? ""
+		
+		var cancellables = Set<AnyCancellable>()
 		let finish = { (result: Result<Void, Error>) in
 			
 			switch result {
 			case .success:
 				log.trace("uploadSeed(): finish(): success")
 				
+				let currentName = Prefs.shared.backupSeed_name(encryptedNodeId: self.encryptedNodeId) ?? ""
+				let needsReUpload = currentName != uploadedName
+				
+				if !needsReUpload {
+					Prefs.shared.backupSeed_setHasUploadedSeed(true, encryptedNodeId: self.encryptedNodeId)
+				}
 				self.consecutiveErrorCount = 0
 				self.updateState { state, deferToSimplifiedStateFlow in
 					switch state.active {
 						case .uploading:
-							state.active = .synced
+							if needsReUpload {
+								state.needsUploadSeed = true
+								deferToSimplifiedStateFlow = true
+							} else {
+								state.needsUploadSeed = false
+								state.active = .synced
+							}
 						default:
 							break
 					}
@@ -581,19 +605,51 @@ class SyncSeedManager {
 				log.trace("uploadSeed(): finish(): failure")
 				self.handleError(error)
 			}
+			
+			cancellables.removeAll()
 		}
+		
+		// UI optimization:
+		// When the user enables seed-backup, they watch as the seed is uploaded.
+		// That is, the UI displays the progress to them with a little spinner.
+		//
+		// Now, when the process takes a few seconds, the user experience is pleasant:
+		// - the user sees the message "uploading to the cloud"
+		// - there's a little spinner animation
+		// - a few seconds later, the process finishes
+		// - and the UI says "your seed is stored in the cloud"
+		//
+		// Then end result is higher confidence in the user.
+		//
+		// However, if the process is too quick, the user experience is different:
+		// - the UI flickers in an unreadable way
+		// - then the UI says "your seed is stored in the cloud"
+		//
+		// The user doesn't know what the flickering UI was for.
+		// And they have to trust that their seed is, indeed, stored in the cloud.
+		//
+		// For this reason we're going to introduce a "readability" delay.
+		
+		let taskPublisher = PassthroughSubject<Result<Void, Error>, Never>()
+		let minDelayPublisher = PassthroughSubject<Void, Never>()
+		
+		Publishers.Zip(
+			taskPublisher,
+			minDelayPublisher.delay(for: 2.5, scheduler: RunLoop.main)
+		).sink { tuple in
+			finish(tuple.0)
+		}.store(in: &cancellables)
+		
+		minDelayPublisher.send()
 		
 		let record = CKRecord(
 			recordType: record_table_name,
-			recordID: CKRecord.ID(
-				recordName: encryptedNodeId,
-				zoneID: CKRecordZone.default().zoneID
-			)
+			recordID: recordID()
 		)
 		
 		record[record_column_mnemonics] = mnemonics
 		record[record_column_language] = "en"
-		record[record_column_name] = "" // Todo
+		record[record_column_name] = uploadedName
 		
 		let operation = CKModifyRecordsOperation(
 			recordsToSave: [record],
@@ -606,9 +662,11 @@ class SyncSeedManager {
 			
 			switch result {
 			case .success(_):
-				finish(.success)
+				log.trace("uploadSeed(): perRecordSaveBlock(): success")
+				taskPublisher.send(.success)
 			case .failure(let error):
-				finish(.failure(error))
+				log.trace("uploadSeed(): perRecordSaveBlock(): failure")
+				taskPublisher.send(.failure(error))
 			}
 		}
 		
@@ -640,10 +698,12 @@ class SyncSeedManager {
 			case .success:
 				log.trace("deleteSeed(): finish(): success")
 				
+				Prefs.shared.backupSeed_setHasUploadedSeed(false, encryptedNodeId: self.encryptedNodeId)
 				self.consecutiveErrorCount = 0
 				self.updateState { state, deferToSimplifiedStateFlow in
 					switch state.active {
 						case .deleting:
+							state.needsDeleteSeed = false
 							state.active = .disabled
 						default:
 							break
@@ -656,8 +716,108 @@ class SyncSeedManager {
 			}
 		}
 		
-		// Todo: I want to test the double-upload scenario first
-		finish(.success)
+		// UI optimization:
+		// When the user disables seed-backup, they watch as the seed is deleted.
+		// That is, the UI displays the progress to them with a little spinner.
+		//
+		// Now, when the process takes a few seconds, the user experience is pleasant:
+		// - the user sees the message "deleting from the cloud"
+		// - there's a little spinner animation
+		// - a few seconds later, the process finishes
+		// - and the UI says "you are responsible for backing up your seed"
+		//
+		// Then end result is higher confidence in the user.
+		// The user knows the seed was deleted from the cloud.
+		//
+		// However, if the process is too quick, the user experience is different:
+		// - the UI flickers in an unreadable way
+		// - then the UI says "you are responsible for backing up your seed"
+		//
+		// The user doesn't know what the flickering UI was for.
+		// And they have to trust that their seed was, indeed, deleted from the cloud.
+		//
+		// For this reason we're going to introduce a "readability" delay.
+		
+		let taskPublisher = PassthroughSubject<Result<Void, Error>, Never>()
+		let minDelayPublisher = PassthroughSubject<Void, Never>()
+		
+		Publishers.Zip(
+			taskPublisher,
+			minDelayPublisher.delay(for: 2.5, scheduler: RunLoop.main)
+		).sink { tuple in
+			finish(tuple.0)
+		}.store(in: &cancellables)
+		
+		minDelayPublisher.send()
+		
+		let recordID = recordID()
+		let operation = CKModifyRecordsOperation(
+			recordsToSave: [],
+			recordIDsToDelete: [recordID]
+		)
+		
+		let perRecordDeleteBlock = {(recordID: CKRecord.ID, result: Result<Void, Error>) in
+			
+			// Note: if the record doesn't exist, and we try to delete it,
+			// CloudKit reports a success result.
+			
+			switch result {
+			case .success(_):
+				log.trace("deleteSeed(): perRecordDeleteBlock(): success")
+				taskPublisher.send(.success)
+			case .failure(let error):
+				log.trace("deleteSeed(): perRecordDeleteBlock(): failure")
+				taskPublisher.send(.failure(error))
+			}
+		}
+		
+		if #available(iOS 15.0, *) {
+			operation.perRecordDeleteBlock = perRecordDeleteBlock
+		} else {
+			operation.modifyRecordsCompletionBlock = {(saved: [CKRecord]?, deleted: [CKRecord.ID]?, error: Error?) in
+				if let error = error {
+					perRecordDeleteBlock(recordID, Result.failure(error))
+				} else {
+					perRecordDeleteBlock(recordID, Result.success)
+				}
+			}
+		}
+		
+		let configuration = CKOperation.Configuration()
+		configuration.allowsCellularAccess = true
+		operation.configuration = configuration
+		
+		CKContainer.default().privateCloudDatabase.add(operation)
+	}
+	
+	// ----------------------------------------
+	// MARK: Utilities
+	// ----------------------------------------
+	
+	private class func record_table_name(chain: Chain) -> String {
+		
+		// From Apple's docs:
+		// > A record type must consist of one or more alphanumeric characters
+		// > and must start with a letter. CloudKit permits the use of underscores,
+		// > but not spaces.
+		//
+		var allowed = CharacterSet.alphanumerics
+		allowed.insert("_")
+		
+		let suffix = chain.name.lowercased().components(separatedBy: allowed.inverted).joined(separator: "")
+		
+		// E.g.:
+		// - seeds_bitcoin_testnet
+		// - seeds_bitcoin_mainnet
+		return "seeds_bitcoin_\(suffix)"
+	}
+	
+	private func recordID() -> CKRecord.ID {
+		
+		return CKRecord.ID(
+			recordName: encryptedNodeId,
+			zoneID: CKRecordZone.default().zoneID
+		)
 	}
 	
 	// ----------------------------------------
@@ -767,19 +927,19 @@ class SyncSeedManager {
 		
 		assert(consecutiveErrorCount > 0, "Invalid state")
 		
+		// Keep in mind:
+		// When the user enables/disables seed-backup,
+		// they will be looking at a UI that shows the sync status.
+		// So we're NOT using small millisecond values for the first failures,
+		// as it makes the UI update too fast for readability.
 		switch consecutiveErrorCount {
-			case  1 : return 250.milliseconds()
-			case  2 : return 500.milliseconds()
-			case  3 : return 1.seconds()
-			case  4 : return 2.seconds()
-			case  5 : return 4.seconds()
-			case  6 : return 8.seconds()
-			case  7 : return 16.seconds()
-			case  8 : return 32.seconds()
-			case  9 : return 64.seconds()
-			case 10 : return 128.seconds()
-			case 11 : return 256.seconds()
-			default : return 512.seconds()
+			case  1 : return 5.seconds()
+			case  2 : return 10.seconds()
+			case  3 : return 30.seconds()
+			case  4 : return 60.seconds()
+			case  5 : return 120.seconds()
+			case  6 : return 300.seconds()
+			default : return 600.seconds()
 		}
 	}
 }

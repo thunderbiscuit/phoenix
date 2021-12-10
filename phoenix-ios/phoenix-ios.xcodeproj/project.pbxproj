@@ -76,7 +76,7 @@
 		DC72C33925A663CA008A927A /* QRCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC72C33825A663CA008A927A /* QRCode.swift */; };
 		DC74174B270F332700F7E3E3 /* KotlinTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC74174A270F332700F7E3E3 /* KotlinTypes.swift */; };
 		DC74174D270F455D00F7E3E3 /* AES256.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC74174C270F455D00F7E3E3 /* AES256.swift */; };
-		DC8107D3255F1FC1002084A3 /* RecoverySeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8107D2255F1FC1002084A3 /* RecoverySeedView.swift */; };
+		DC8107D3255F1FC1002084A3 /* ManualBackupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8107D2255F1FC1002084A3 /* ManualBackupView.swift */; };
 		DC81B79F25BF2AA200F5A52C /* MVI.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC81B79E25BF2AA200F5A52C /* MVI.swift */; };
 		DC89857F25914747007B253F /* UIApplicationState+Phoenix.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC89857E25914747007B253F /* UIApplicationState+Phoenix.swift */; };
 		DC9473FA261270B4008D7242 /* MVI+Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC9473F9261270B4008D7242 /* MVI+Mock.swift */; };
@@ -98,10 +98,11 @@
 		DCAEF8D9275E69B000015993 /* SyncSeedManager_State.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCAEF8D8275E69B000015993 /* SyncSeedManager_State.swift */; };
 		DCAEF8F5276131A600015993 /* CheckboxToggleStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCAEF8F4276131A600015993 /* CheckboxToggleStyle.swift */; };
 		DCAEF8F727628BEB00015993 /* Either.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCAEF8F627628BEB00015993 /* Either.swift */; };
+		DCAEF8FA2763F2A400015993 /* CloudBackupAgreement.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCAEF8F92763F2A400015993 /* CloudBackupAgreement.swift */; };
 		DCB04685260D162C007FDA37 /* ViewName.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB04684260D162C007FDA37 /* ViewName.swift */; };
 		DCB0DB8A255AE42F005B29C8 /* PhoenixShared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCB0DB83255AE42F005B29C8 /* PhoenixShared.framework */; };
 		DCB0DBB1255AEE22005B29C8 /* PhoenixShared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DCB0DB83255AE42F005B29C8 /* PhoenixShared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		DCB493C92694F69B001B0F09 /* CloudOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB493C82694F69B001B0F09 /* CloudOptionsView.swift */; };
+		DCB493C92694F69B001B0F09 /* BackupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB493C82694F69B001B0F09 /* BackupView.swift */; };
 		DCB493CB269F3B06001B0F09 /* Result+Deugly.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB493CA269F3B05001B0F09 /* Result+Deugly.swift */; };
 		DCB493CD269F8531001B0F09 /* Int+TimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB493CC269F8531001B0F09 /* Int+TimeInterval.swift */; };
 		DCB493CF269F859E001B0F09 /* SyncTxManager_State.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB493CE269F859E001B0F09 /* SyncTxManager_State.swift */; };
@@ -248,7 +249,7 @@
 		DC72C33825A663CA008A927A /* QRCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCode.swift; sourceTree = "<group>"; };
 		DC74174A270F332700F7E3E3 /* KotlinTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KotlinTypes.swift; sourceTree = "<group>"; };
 		DC74174C270F455D00F7E3E3 /* AES256.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AES256.swift; sourceTree = "<group>"; };
-		DC8107D2255F1FC1002084A3 /* RecoverySeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoverySeedView.swift; sourceTree = "<group>"; };
+		DC8107D2255F1FC1002084A3 /* ManualBackupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualBackupView.swift; sourceTree = "<group>"; };
 		DC81B79E25BF2AA200F5A52C /* MVI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MVI.swift; sourceTree = "<group>"; };
 		DC89857E25914747007B253F /* UIApplicationState+Phoenix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplicationState+Phoenix.swift"; sourceTree = "<group>"; };
 		DC9473F9261270B4008D7242 /* MVI+Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MVI+Mock.swift"; sourceTree = "<group>"; };
@@ -272,9 +273,10 @@
 		DCAEF8D8275E69B000015993 /* SyncSeedManager_State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncSeedManager_State.swift; sourceTree = "<group>"; };
 		DCAEF8F4276131A600015993 /* CheckboxToggleStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxToggleStyle.swift; sourceTree = "<group>"; };
 		DCAEF8F627628BEB00015993 /* Either.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Either.swift; sourceTree = "<group>"; };
+		DCAEF8F92763F2A400015993 /* CloudBackupAgreement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudBackupAgreement.swift; sourceTree = "<group>"; };
 		DCB04684260D162C007FDA37 /* ViewName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewName.swift; sourceTree = "<group>"; };
 		DCB0DB83255AE42F005B29C8 /* PhoenixShared.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PhoenixShared.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		DCB493C82694F69B001B0F09 /* CloudOptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudOptionsView.swift; sourceTree = "<group>"; };
+		DCB493C82694F69B001B0F09 /* BackupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupView.swift; sourceTree = "<group>"; };
 		DCB493CA269F3B05001B0F09 /* Result+Deugly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Result+Deugly.swift"; sourceTree = "<group>"; };
 		DCB493CC269F8531001B0F09 /* Int+TimeInterval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+TimeInterval.swift"; sourceTree = "<group>"; };
 		DCB493CE269F859E001B0F09 /* SyncTxManager_State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTxManager_State.swift; sourceTree = "<group>"; };
@@ -582,7 +584,7 @@
 				C8D7A1F8A123C59199C182C2 /* ElectrumConfigurationView.swift */,
 				C8D7A2BD01ADA0DE6034AE0F /* TorConfigurationView.swift */,
 				DC0732EB263CA6C3004CB88D /* PaymentOptionsView.swift */,
-				DCB493C82694F69B001B0F09 /* CloudOptionsView.swift */,
+				DCAEF8F82763F27A00015993 /* backup */,
 			);
 			path = general;
 			sourceTree = "<group>";
@@ -591,7 +593,6 @@
 			isa = PBXGroup;
 			children = (
 				DCACF7082566D0F00009B01E /* AppAccessView.swift */,
-				DC8107D2255F1FC1002084A3 /* RecoverySeedView.swift */,
 			);
 			path = security;
 			sourceTree = "<group>";
@@ -622,6 +623,16 @@
 				DCACF6F52566D0BA0009B01E /* KeyStoreError.swift */,
 			);
 			path = security;
+			sourceTree = "<group>";
+		};
+		DCAEF8F82763F27A00015993 /* backup */ = {
+			isa = PBXGroup;
+			children = (
+				DCB493C82694F69B001B0F09 /* BackupView.swift */,
+				DCAEF8F92763F2A400015993 /* CloudBackupAgreement.swift */,
+				DC8107D2255F1FC1002084A3 /* ManualBackupView.swift */,
+			);
+			path = backup;
 			sourceTree = "<group>";
 		};
 		DCB0DB84255AE42F005B29C8 /* phoenix-ios-framework */ = {
@@ -894,10 +905,11 @@
 				DC09085825B5E43900A46136 /* String+VersionComparison.swift in Sources */,
 				DCACF6FE2566D0BA0009B01E /* GenericPasswordConvertible.swift in Sources */,
 				DC33369826BAF721000E3F49 /* ShortSheet.swift in Sources */,
-				DC8107D3255F1FC1002084A3 /* RecoverySeedView.swift in Sources */,
+				DC8107D3255F1FC1002084A3 /* ManualBackupView.swift in Sources */,
+				DCAEF8FA2763F2A400015993 /* CloudBackupAgreement.swift in Sources */,
 				DC99E90925B78FA800FB20F7 /* EnabledSecurity.swift in Sources */,
 				DCB493CF269F859E001B0F09 /* SyncTxManager_State.swift in Sources */,
-				DCB493C92694F69B001B0F09 /* CloudOptionsView.swift in Sources */,
+				DCB493C92694F69B001B0F09 /* BackupView.swift in Sources */,
 				7555FF7F242A565900829871 /* AppDelegate.swift in Sources */,
 				DC74174B270F332700F7E3E3 /* KotlinTypes.swift in Sources */,
 				DC142135261E72320075857A /* AboutHTML.swift in Sources */,
