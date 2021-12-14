@@ -65,20 +65,34 @@ fileprivate struct Section_BackupSeed: View {
 				HStack(alignment: VerticalAlignment.center, spacing: 0) {
 					Label("Manual backup", systemImage: "squareshape.split.3x3")
 					Spacer()
-					Image(systemName: "checkmark")
-						.font(Font.body.weight(Font.Weight.heavy))
-						.foregroundColor(Color.appAccent)
-						.isHidden(backupSeed_enabled == true)
+					if !backupSeed_enabled {
+						if !manualBackup_taskDone {
+							Image(systemName: "exclamationmark.triangle")
+								.renderingMode(.template)
+								.foregroundColor(Color.appWarn)
+								.padding(.trailing, 4)
+						}
+						Image(systemName: "checkmark")
+							.font(Font.body.weight(Font.Weight.heavy))
+							.foregroundColor(Color.appAccent)
+					}
 				}
 			}
 			NavigationLink(destination: CloudBackupAgreement(backupSeed_enabled: $backupSeed_enabled)) {
 				HStack(alignment: VerticalAlignment.center, spacing: 0) {
 					Label("iCloud backup", systemImage: "icloud")
 					Spacer()
-					Image(systemName: "checkmark")
-						.foregroundColor(Color.appAccent)
-						.font(Font.body.weight(Font.Weight.heavy))
-						.isHidden(backupSeed_enabled == false)
+					if backupSeed_enabled {
+						if syncState != .synced {
+							Image(systemName: "exclamationmark.triangle")
+								.renderingMode(.template)
+								.foregroundColor(Color.appWarn)
+								.padding(.trailing, 4)
+						}
+						Image(systemName: "checkmark")
+							.foregroundColor(Color.appAccent)
+							.font(Font.body.weight(Font.Weight.heavy))
+					}
 				}
 			}
 			

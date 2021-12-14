@@ -12,6 +12,11 @@ fileprivate var log = Logger(
 fileprivate var log = Logger(OSLog.disabled)
 #endif
 
+enum BackupSeedState {
+	case notBackedUp
+	case backupInProgress
+	case safelyBackedUp
+}
 
 class Prefs {
 	
@@ -380,6 +385,10 @@ class Prefs {
 		}
 	}
 	
+	lazy private(set) var backupSeed_hasUploadedSeed_publisher: PassthroughSubject<Void, Never> = {
+		return PassthroughSubject<Void, Never>()
+	}()
+	
 	private func backupSeed_hasUploadedSeed_key(_ encryptedNodeId: String) -> String {
 		return "\(Keys.backupSeed_hasUploadedSeed.rawValue)-\(encryptedNodeId)"
 	}
@@ -397,6 +406,7 @@ class Prefs {
 		} else {
 			UserDefaults.standard.removeObject(forKey: key)
 		}
+		backupSeed_hasUploadedSeed_publisher.send()
 	}
 	
 	lazy private(set) var backupSeed_name_publisher: PassthroughSubject<Void, Never> = {
@@ -433,7 +443,7 @@ class Prefs {
 	// MARK: Manual Seed Backup
 	// --------------------------------------------------
 	
-	lazy private(set) var manualBackup_state_publisher: PassthroughSubject<Void, Never> = {
+	lazy private(set) var manualBackup_taskDone_publisher: PassthroughSubject<Void, Never> = {
 		return PassthroughSubject<Void, Never>()
 	}()
 	
@@ -443,9 +453,7 @@ class Prefs {
 	
 	func manualBackup_taskDone(encryptedNodeId: String) -> Bool {
 		
-		let wtf = UserDefaults.standard.bool(forKey: manualBackup_taskDone_key(encryptedNodeId))
-		log.debug("manualBackup_taskDone() = \(wtf)")
-		return wtf
+		return UserDefaults.standard.bool(forKey: manualBackup_taskDone_key(encryptedNodeId))
 	}
 	
 	func manualBackup_setTaskDone(_ newValue: Bool, encryptedNodeId: String) {
@@ -456,6 +464,56 @@ class Prefs {
 		} else {
 			UserDefaults.standard.removeObject(forKey: key)
 		}
-		manualBackup_state_publisher.send()
+		manualBackup_taskDone_publisher.send()
+	}
+	
+	// --------------------------------------------------
+	// MARK: Seed Backup State
+	// --------------------------------------------------
+	
+	func backupSeedStatePublisher(_ encryptedNodeId: String) -> AnyPublisher<BackupSeedState, Never> {
+		
+		let publisher = Publishers.CombineLatest3(
+			backupSeed_isEnabled_publisher,       // CurrentValueSubject<Bool, Never>
+			backupSeed_hasUploadedSeed_publisher, // PassthroughSubject<Void, Never>
+			manualBackup_taskDone_publisher       // PassthroughSubject<Void, Never>
+		).map { (backupSeed_isEnabled: Bool, _, _) -> BackupSeedState in
+			
+			let prefs = Prefs.shared
+			
+			let backupSeed_hasUploadedSeed = prefs.backupSeed_hasUploadedSeed(encryptedNodeId: encryptedNodeId)
+			let manualBackup_taskDone = prefs.manualBackup_taskDone(encryptedNodeId: encryptedNodeId)
+			
+			if backupSeed_isEnabled {
+				if backupSeed_hasUploadedSeed {
+					return .safelyBackedUp
+				} else {
+					return .backupInProgress
+				}
+			} else {
+				if manualBackup_taskDone {
+					return .safelyBackedUp
+				} else {
+					return .notBackedUp
+				}
+			}
+		}
+		.handleEvents(receiveRequest: { _ in
+			
+			// Publishers.CombineLatest doesn't fire until all publishers have emitted a value.
+			// We don't have have to worry about that with the CurrentValueSubject, because it always has a value.
+			// But for the PassthroughSubject publishers, this poses a problem.
+			//
+			// The other related publishers (Merge & Zip) don't do exactly what we want either.
+			// So we're taking the simplest approach, and force-firing the associated PassthroughSubject publishers.
+			
+			let prefs = Prefs.shared
+			
+			prefs.backupSeed_hasUploadedSeed_publisher.send()
+			prefs.manualBackup_taskDone_publisher.send()
+		})
+		.eraseToAnyPublisher()
+		
+		return publisher
 	}
 }
