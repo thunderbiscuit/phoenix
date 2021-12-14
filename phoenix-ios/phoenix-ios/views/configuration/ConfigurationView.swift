@@ -78,13 +78,15 @@ struct ConfigurationView: MVIView {
 					}
 				}
 				
-				NavigationLink(
-					destination: BackupView(),
-					tag: Tag.BackupView,
-					selection: $selectedTag
-				) {
-					Label { Text("Backup") } icon: {
-						Image(systemName: "icloud.and.arrow.up")
+				if fullMode {
+					NavigationLink(
+						destination: BackupView(),
+						tag: Tag.BackupView,
+						selection: $selectedTag
+					) {
+						Label { Text("Backup") } icon: {
+							Image(systemName: "icloud.and.arrow.up")
+						}
 					}
 				}
 			}
@@ -101,15 +103,6 @@ struct ConfigurationView: MVIView {
 							Image(systemName: isTouchID ? "touchid" : "faceid")
 						}
 					}
-//					NavigationLink(
-//						destination: RecoverySeedView(),
-//						tag: Tag.RecoverySeedView,
-//						selection: $selectedTag
-//					) {
-//						Label { Text("Recovery phrase") } icon: {
-//							Image(systemName: "key")
-//						}
-//					}
 				}
 			}
 

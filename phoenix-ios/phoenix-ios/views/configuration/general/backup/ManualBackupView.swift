@@ -13,15 +13,48 @@ fileprivate var log = Logger(OSLog.disabled)
 
 struct ManualBackupView : View {
 	
+	@Binding var manualBackup_taskDone: Bool
+	
 	@State var isDecrypting = false
 	@State var revealSeed = false
 	@State var mnemonics: [String] = []
+	
+	let encryptedNodeId: String
+	@State var legal_taskDone: Bool
+	@State var legal_lossRisk: Bool
+	
+	@State var animatingLegalToggleColor = false
+	
+	@Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+	
+	var canSave: Bool {
+		if manualBackup_taskDone {
+			// Currently enabled.
+			// Saving to disable: user only needs to disable the taskDone toggle
+			return !legal_taskDone
+		} else {
+			// Currently disabled.
+			// To enable, user must enable both toggles
+			return legal_taskDone && legal_lossRisk
+		}
+	}
+	
+	init(manualBackup_taskDone: Binding<Bool>) {
+		self._manualBackup_taskDone = manualBackup_taskDone
+		
+		let encryptedNodeId = AppDelegate.get().encryptedNodeId!
+		self.encryptedNodeId = encryptedNodeId
+		
+		self._legal_taskDone = State<Bool>(initialValue: manualBackup_taskDone.wrappedValue)
+		self._legal_lossRisk = State<Bool>(initialValue: manualBackup_taskDone.wrappedValue)
+	}
 	
 	var body: some View {
 		
 		List {
 			section_info()
 			section_button()
+			section_legal()
 		}
 		.sheet(isPresented: $revealSeed) {
 			
@@ -34,6 +67,29 @@ struct ManualBackupView : View {
 			NSLocalizedString("Manual Backup", comment: "Navigation bar title"),
 			displayMode: .inline
 		)
+		.navigationBarBackButtonHidden(true)
+		.navigationBarItems(leading: backButton())
+		.onAppear {
+			onAppear()
+		}
+	}
+	
+	@ViewBuilder
+	func backButton() -> some View {
+		
+		Button {
+			didTapBackButton()
+		} label: {
+			HStack(alignment: VerticalAlignment.center, spacing: 0) {
+				Image(systemName: "chevron.left")
+					 .font(.title2)
+				if canSave {
+					Text("Save")
+				} else {
+					Text("Cancel")
+				}
+			}
+		}
 	}
 	
 	@ViewBuilder
@@ -111,13 +167,78 @@ struct ManualBackupView : View {
 		} // </Section>
 	}
 	
-//	@ViewBuilder
-//	func section_legal() -> some View {
-//		
-//		// Todo...
-//	}
+	@ViewBuilder
+	func section_legal() -> some View {
+		
+		Section {
+			
+			Toggle(isOn: $legal_taskDone) {
+				Text(
+					"""
+					I have saved my recovery phrase somewhere safe.
+					"""
+				)
+				.lineLimit(nil)
+				.alignmentGuide(VerticalAlignment.center) { d in
+					d[VerticalAlignment.firstTextBaseline]
+				}
+			}
+			.toggleStyle(CheckboxToggleStyle(
+				onImage: onImage(),
+				offImage: offImage()
+			))
+			.padding(.vertical, 5)
+			
+			Toggle(isOn: $legal_lossRisk) {
+				Text(
+					"""
+					I understand that if I lose my phone & my recovery phrase, \
+					then I will lose the funds in my wallet.
+					"""
+				)
+				.lineLimit(nil)
+				.alignmentGuide(VerticalAlignment.center) { d in
+					d[VerticalAlignment.firstTextBaseline]
+				}
+			}
+			.toggleStyle(CheckboxToggleStyle(
+				onImage: onImage(),
+				offImage: offImage()
+			))
+			.padding(.vertical, 5)
+			
+		} header: {
+			Text("Legal")
+			
+		} // </Section>
+	}
 	
-	func decrypt() -> Void {
+	@ViewBuilder
+	func onImage() -> some View {
+		Image(systemName: "checkmark.square.fill")
+			.imageScale(.large)
+	}
+	
+	@ViewBuilder
+	func offImage() -> some View {
+		Image(systemName: "square")
+			.renderingMode(.template)
+			.imageScale(.large)
+			.foregroundColor(animatingLegalToggleColor ? Color.red : Color.primary)
+	}
+	
+	func onAppear(){
+		log.trace("onAppear()")
+		
+		DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+			withAnimation(Animation.linear(duration: 1.0).repeatForever(autoreverses: true)) {
+				animatingLegalToggleColor = true
+			}
+		}
+	}
+	
+	func decrypt() {
+		log.trace("decrypt()")
 		
 		isDecrypting = true
 		
@@ -153,6 +274,19 @@ struct ManualBackupView : View {
 			}
 		}
 	}
+	
+	func didTapBackButton() {
+		log.trace("didTapBackButton()")
+		
+		if canSave {
+			let taskDone = legal_taskDone && legal_lossRisk
+			
+			manualBackup_taskDone = taskDone
+			Prefs.shared.manualBackup_setTaskDone(taskDone, encryptedNodeId: encryptedNodeId)
+		}
+		presentationMode.wrappedValue.dismiss()
+	}
+
 }
 
 struct RecoverySeedReveal: View {
@@ -273,7 +407,8 @@ struct RecoverySeedReveal: View {
 
 class RecoverySeedView_Previews: PreviewProvider {
 	
-	@State static var revealSeed = true
+	@State static var manualBackup_taskDone: Bool = true
+	@State static var revealSeed: Bool = true
 	
 	@State static var testMnemonics = [
 		"witch", "collapse", "practice", "feed", "shame", "open",
@@ -282,11 +417,11 @@ class RecoverySeedView_Previews: PreviewProvider {
 	
 	static var previews: some View {
 		
-		ManualBackupView()
+		ManualBackupView(manualBackup_taskDone: $manualBackup_taskDone)
 			.preferredColorScheme(.light)
 			.previewDevice("iPhone 8")
 		
-		ManualBackupView()
+		ManualBackupView(manualBackup_taskDone: $manualBackup_taskDone)
 			.preferredColorScheme(.dark)
 			.previewDevice("iPhone 8")
 		

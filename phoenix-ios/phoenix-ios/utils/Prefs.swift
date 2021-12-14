@@ -3,7 +3,7 @@ import PhoenixShared
 import Combine
 import os.log
 
-#if DEBUG && false
+#if DEBUG && true
 fileprivate var log = Logger(
 	subsystem: Bundle.main.bundleIdentifier!,
 	category: "Prefs"
@@ -40,6 +40,7 @@ class Prefs {
 		case showChannelsRemoteBalance
 		case currencyConverterList
 		case recentTipPercents
+		case manualBackup_taskDone
 	}
 	
 	lazy private(set) var currencyTypePublisher: CurrentValueSubject<CurrencyType, Never> = {
@@ -411,10 +412,12 @@ class Prefs {
 		return UserDefaults.standard.string(forKey: backupSeed_name_key(encryptedNodeId))
 	}
 	
-	func backupSeed_setName(_ newValue: String, encryptedNodeId: String) {
+	func backupSeed_setName(_ value: String?, encryptedNodeId: String) {
 		
 		let key = backupSeed_name_key(encryptedNodeId)
 		let oldValue = backupSeed_name(encryptedNodeId: encryptedNodeId) ?? ""
+		let newValue = value ?? ""
+		
 		if oldValue != newValue {
 			if newValue.isEmpty {
 				UserDefaults.standard.removeObject(forKey: key)
@@ -424,5 +427,35 @@ class Prefs {
 			backupSeed_setHasUploadedSeed(false, encryptedNodeId: encryptedNodeId)
 			backupSeed_name_publisher.send()
 		}
+	}
+	
+	// --------------------------------------------------
+	// MARK: Manual Seed Backup
+	// --------------------------------------------------
+	
+	lazy private(set) var manualBackup_state_publisher: PassthroughSubject<Void, Never> = {
+		return PassthroughSubject<Void, Never>()
+	}()
+	
+	private func manualBackup_taskDone_key(_ encryptedNodeId: String) -> String {
+		return "\(Keys.manualBackup_taskDone)-\(encryptedNodeId)"
+	}
+	
+	func manualBackup_taskDone(encryptedNodeId: String) -> Bool {
+		
+		let wtf = UserDefaults.standard.bool(forKey: manualBackup_taskDone_key(encryptedNodeId))
+		log.debug("manualBackup_taskDone() = \(wtf)")
+		return wtf
+	}
+	
+	func manualBackup_setTaskDone(_ newValue: Bool, encryptedNodeId: String) {
+		
+		let key = manualBackup_taskDone_key(encryptedNodeId)
+		if newValue {
+			UserDefaults.standard.setValue(newValue, forKey: key)
+		} else {
+			UserDefaults.standard.removeObject(forKey: key)
+		}
+		manualBackup_state_publisher.send()
 	}
 }

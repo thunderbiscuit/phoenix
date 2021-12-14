@@ -14,6 +14,11 @@ fileprivate var log = Logger(
 fileprivate var log = Logger(OSLog.disabled)
 #endif
 
+enum WalletRestoreType {
+	case fromManualEntry
+	case fromCloudBackup(name: String?)
+}
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 	
@@ -674,32 +679,83 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 	// MARK: PhoenixBusiness
 	// --------------------------------------------------
 	
-	func loadWallet(mnemonics: [String], seed knownSeed: KotlinByteArray?) -> Void {
+	/// Loads the given wallet, and starts the Lightning node.
+	///
+	/// - Parameters:
+	///   - mnemonics: The 12-word recovery phrase
+	///   - seed: The seed is extracted from the mnemonics. If you've already performed this
+	///           step (i.e. during verification), then pass it here to avoid the duplicate effort.
+	///   - walletRestoreType: If restoring a wallet from a backup, pass the type here.
+	///
+	@discardableResult
+	func loadWallet(
+		mnemonics: [String],
+		seed knownSeed: KotlinByteArray? = nil,
+		walletRestoreType: WalletRestoreType? = nil
+	) -> Bool {
+		
 		log.trace("loadWallet()")
 		assertMainThread()
 		
-		if !walletLoaded {
-			let seed = knownSeed ?? business.prepWallet(mnemonics: mnemonics, passphrase: "")
-			let cloudInfo = business.loadWallet(seed: seed)
-			walletLoaded = true
-			maybeRegisterFcmToken()
-			setupActivePaymentsListener()
-			
-			if let cloudKey = cloudInfo?.first,
-				let encryptedNodeId = cloudInfo?.second
-			{
-				_encryptedNodeId = encryptedNodeId as String
-				_syncSeedManager = SyncSeedManager(
-					chain: business.chain,
-					mnemonics: mnemonics,
-					encryptedNodeId: encryptedNodeId as String
-				)
-				_syncTxManager = SyncTxManager(
-					cloudKey: cloudKey,
-					encryptedNodeId: encryptedNodeId as String
-				)
-			}
+		guard walletLoaded == false else {
+			return false
 		}
+		
+		let seed = knownSeed ?? business.prepWallet(mnemonics: mnemonics, passphrase: "")
+		let cloudInfo = business.loadWallet(seed: seed)
+		walletLoaded = true
+		
+		maybeRegisterFcmToken()
+		setupActivePaymentsListener()
+		
+		if let cloudInfo = cloudInfo {
+			
+			let cloudKey = cloudInfo.first!
+			let encryptedNodeId = cloudInfo.second! as String
+			
+			if let walletRestoreType = walletRestoreType {
+				switch walletRestoreType {
+				case .fromManualEntry:
+					//
+					// User is restoring wallet after manually typing in the recovery phrase.
+					// So we can mark the manual_backup task as completed.
+					//
+					Prefs.shared.manualBackup_setTaskDone(true, encryptedNodeId: encryptedNodeId)
+					//
+					// And ensure cloud backup is disabled for the wallet.
+					//
+					Prefs.shared.backupSeed_isEnabled = false
+					Prefs.shared.backupSeed_setName(nil, encryptedNodeId: encryptedNodeId)
+					Prefs.shared.backupSeed_setHasUploadedSeed(false, encryptedNodeId: encryptedNodeId)
+					
+				case .fromCloudBackup(let name):
+					//
+					// User is restoring wallet from an existing iCloud backup.
+					// So we can mark the iCloud backpu as completed.
+					//
+					Prefs.shared.backupSeed_isEnabled = true
+					Prefs.shared.backupSeed_setName(name, encryptedNodeId: encryptedNodeId)
+					Prefs.shared.backupSeed_setHasUploadedSeed(true, encryptedNodeId: encryptedNodeId)
+					//
+					// And ensure manual backup is diabled for the wallet.
+					//
+					Prefs.shared.manualBackup_setTaskDone(false, encryptedNodeId: encryptedNodeId)
+				}
+			}
+			
+			_encryptedNodeId = encryptedNodeId
+			_syncSeedManager = SyncSeedManager(
+				chain: business.chain,
+				mnemonics: mnemonics,
+				encryptedNodeId: encryptedNodeId
+			)
+			_syncTxManager = SyncTxManager(
+				cloudKey: cloudKey,
+				encryptedNodeId: encryptedNodeId
+			)
+		}
+		
+		return true
 	}
 	
 	private func connectionsChanged(_ connections: Connections) -> Void {

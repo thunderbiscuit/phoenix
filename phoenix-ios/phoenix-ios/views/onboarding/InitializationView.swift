@@ -91,7 +91,7 @@ struct InitializationView: MVIView {
 				)
 				.padding(.bottom, 40)
 
-				NavigationLink(destination: RestoreWalletView()) {
+				NavigationLink(destination: RestoreView()) {
 					HStack(alignment: VerticalAlignment.firstTextBaseline) {
 						Image(systemName: "arrow.down.circle")
 							.imageScale(.small)

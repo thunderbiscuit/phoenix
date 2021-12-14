@@ -37,17 +37,31 @@ struct BackupView: View {
 
 fileprivate struct Section_BackupSeed: View {
 	
-	@State var backupSeed_enabled = Prefs.shared.backupSeed_isEnabled
+	@State var manualBackup_taskDone: Bool
+	@State var backupSeed_enabled: Bool
 	
 	@State var syncState: SyncSeedManager_State = .initializing
-	let syncSeedManager = AppDelegate.get().syncSeedManager!
+	let syncSeedManager: SyncSeedManager
+	
+	init() {
+		let appDelegate = AppDelegate.get()
+		
+		let encryptedNodeId = appDelegate.encryptedNodeId!
+		self.syncSeedManager = appDelegate.syncSeedManager!
+		
+		let manualBackup_taskDone = Prefs.shared.manualBackup_taskDone(encryptedNodeId: encryptedNodeId)
+		self._manualBackup_taskDone = State<Bool>(initialValue: manualBackup_taskDone)
+		
+		let backupSeed_enabled = Prefs.shared.backupSeed_isEnabled
+		self._backupSeed_enabled = State<Bool>(initialValue: backupSeed_enabled)
+	}
 	
 	@ViewBuilder
 	var body: some View {
 		
 		Section(header: Text("Recovery Phrase")) {
 			
-			NavigationLink(destination: ManualBackupView()) {
+			NavigationLink(destination: ManualBackupView(manualBackup_taskDone: $manualBackup_taskDone)) {
 				HStack(alignment: VerticalAlignment.center, spacing: 0) {
 					Label("Manual backup", systemImage: "squareshape.split.3x3")
 					Spacer()
@@ -474,7 +488,6 @@ fileprivate struct SyncErrorDetails: View, ViewName {
 						))
 						.foregroundColor(Color.appAccent)
 						.frame(width: 20, height: 20, alignment: .center)
-					//	.frame(minWidth: 25, maxWidth: 35, minHeight: 25, maxHeight: 35, alignment: .center)
 					
 					Text(verbatim: "\(remaining) / \(total)")
 						.font(.system(.callout, design: .monospaced))

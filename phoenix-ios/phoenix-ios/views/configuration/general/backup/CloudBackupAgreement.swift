@@ -25,6 +25,8 @@ struct CloudBackupAgreement: View {
 	let originalName: String
 	@State var name: String
 	
+	@Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+	
 	var canSave: Bool {
 		if backupSeed_enabled {
 			// Currently enabled.
@@ -37,8 +39,6 @@ struct CloudBackupAgreement: View {
 			return toggle_enabled && legal_appleRisk && legal_governmentRisk
 		}
 	}
-	
-	@Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 	
 	init(backupSeed_enabled: Binding<Bool>) {
 		self._backupSeed_enabled = backupSeed_enabled

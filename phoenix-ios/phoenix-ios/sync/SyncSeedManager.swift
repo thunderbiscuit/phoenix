@@ -19,6 +19,7 @@ fileprivate let record_column_language = "language"
 fileprivate let record_column_name = "name"
 
 struct SeedBackup {
+	let recordID: CKRecord.ID
 	let mnemonics: String
 	let language: String
 	let name: String?
@@ -160,6 +161,7 @@ class SyncSeedManager {
 			log.trace("fetchSeeds(): recursiveBatchFetch()")
 			
 			let recordMatchedBlock = {(recordID: CKRecord.ID, result: Result<CKRecord, Error>) in
+				log.debug("fetchSeeds(): recordMatchedBlock()")
 				
 				if case .success(let record) = result {
 					
@@ -168,6 +170,7 @@ class SyncSeedManager {
 						let name = record[record_column_name] as? String?
 					{
 						let item = SeedBackup(
+							recordID: recordID,
 							mnemonics: mnemonics,
 							language: language,
 							name: name,
@@ -196,8 +199,10 @@ class SyncSeedManager {
 				case .failure(let error):
 
 					if let ckerror = error as? CKError {
+						log.debug("fetchSeeds(): queryResultBlock(): ckerror = \(String(describing: ckerror))")
 						publisher.send(completion: .failure(.cloudKit(underlying: ckerror)))
 					} else {
+						log.debug("fetchSeeds(): queryResultBlock(): error = \(String(describing: error))")
 						publisher.send(completion: .failure(.unknown(underlying: error)))
 					}
 				}
