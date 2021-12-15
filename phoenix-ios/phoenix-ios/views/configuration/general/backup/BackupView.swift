@@ -98,8 +98,16 @@ fileprivate struct Section_BackupSeed: View {
 			
 			// Implicit divider added here
 			
-			status()
-				.padding(.vertical, 10)
+			VStack(alignment: HorizontalAlignment.leading, spacing: 0) {
+				
+				status()
+					.padding(.vertical, 10)
+				
+				if !backupSeed_enabled && !manualBackup_taskDone {
+					backupWarning()
+						.padding(.vertical, 10)
+				}
+			}
 			
 		} // </Section>
 		.onChange(of: backupSeed_enabled) { newValue in
@@ -129,6 +137,30 @@ fileprivate struct Section_BackupSeed: View {
 				status_syncState()
 			}
 		}
+	}
+	
+	@ViewBuilder
+	func backupWarning() -> some View {
+		
+		Label {
+			Text(
+				"""
+				You have not backed up your recovery phrase! \
+				If you do not back it up and you lose access to Phoenix \
+				you will lose your funds!
+				"""
+			)
+		} icon: {
+			Image(systemName: "exclamationmark.circle")
+				.renderingMode(.template)
+				.imageScale(.large)
+				.foregroundColor(Color.appWarn)
+		}
+		.padding()
+		.overlay(
+			RoundedRectangle(cornerRadius: 8)
+				.stroke(Color.appWarn, lineWidth: 1)
+		)
 	}
 	
 	@ViewBuilder
